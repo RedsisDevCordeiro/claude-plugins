@@ -21,9 +21,9 @@ do servidor MCP `redsis`:
 | `redsis_buscar("regras", termo)` | quando não se sabe o ID da ficha |
 | `redsis_listar("regras", sob)` | enumera: `sob="01 - Modulos"`, `sob="05 - Configuracoes"` |
 
-**Não procure a base no disco.** Numa máquina cliente não existe `C:\Agentes`. Se o servidor
-não responder, **diga isso e pare** — regra de negócio respondida de memória é exatamente o
-que esta base existe para impedir.
+**Não procure a base no disco.** Numa máquina cliente o vault não existe. Se o servidor não
+responder, **diga isso e pare** — regra de negócio respondida de memória é exatamente o que
+esta base existe para impedir.
 
 A árvore por trás das ferramentas:
 

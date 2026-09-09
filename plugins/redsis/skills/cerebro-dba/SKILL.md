@@ -21,8 +21,8 @@ da Redsis e chegam aqui pelas ferramentas do servidor MCP `redsis`:
 | `redsis_buscar("dba", termo)` | quando não se sabe o nome exato da nota |
 | `redsis_listar("dba", sob)` | enumera sem ler: `sob="DOC"` devolve as 408 colunas de DOC |
 
-**Não procure a base no disco.** Numa máquina cliente não existe `C:\Agentes`, e `Grep` ou
-`Read` sobre o vault não é caminho alternativo — é sinal de que a ferramenta certa não foi
+**Não procure a base no disco.** Numa máquina cliente o vault não existe — `Grep` ou `Read`
+sobre `01 - Tabelas` não é caminho alternativo, é sinal de que a ferramenta certa não foi
 chamada. Se o servidor não responder, **diga isso e pare**: responder de memória sobre 8.514
 colunas é exatamente o erro que esta base existe para impedir.
 
