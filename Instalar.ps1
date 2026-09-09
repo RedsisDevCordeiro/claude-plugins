@@ -93,8 +93,13 @@ $cfg = if (Test-Path $arquivoSettings) {
 }
 else { [pscustomobject]@{} }
 
+# Em objeto vazio, PSObject.Properties.Name devolve $null - por isso o @() em volta.
+function Tem-Propriedade($objeto, [string]$nome) {
+    @($objeto.PSObject.Properties.Name) -contains $nome
+}
+
 function Garante-Propriedade($objeto, [string]$nome, $valorPadrao) {
-    if (-not $objeto.PSObject.Properties.Name.Contains($nome)) {
+    if (-not (Tem-Propriedade $objeto $nome)) {
         $objeto | Add-Member -NotePropertyName $nome -NotePropertyValue $valorPadrao
     }
     $objeto.$nome
@@ -102,12 +107,11 @@ function Garante-Propriedade($objeto, [string]$nome, $valorPadrao) {
 
 # Marketplace de terceiro vem com auto-update DESLIGADO. Sem esta linha, skill nova nunca chega.
 $mkts = Garante-Propriedade $cfg 'extraKnownMarketplaces' ([pscustomobject]@{})
-$dono, $repo = $Marketplace -split '/', 2
 $entrada = [pscustomobject]@{
     source     = [pscustomobject]@{ source = 'github'; repo = $Marketplace }
     autoUpdate = $true
 }
-if ($mkts.PSObject.Properties.Name.Contains($NomeMarketplace)) { $mkts.$NomeMarketplace = $entrada }
+if (Tem-Propriedade $mkts $NomeMarketplace) { $mkts.$NomeMarketplace = $entrada }
 else { $mkts | Add-Member -NotePropertyName $NomeMarketplace -NotePropertyValue $entrada }
 
 # Sem isto, cada pergunta que toca a base levanta prompt de permissão — o oposto de
