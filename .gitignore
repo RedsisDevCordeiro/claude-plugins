@@ -1,0 +1,5 @@
+# Este repositorio e FINO de proposito: so o plugin. Nada de vault, nada de segredo.
+# O token do MCP nunca entra aqui - ele vem da variavel REDSIS_MCP_TOKEN de cada maquina.
+*.token
+token.txt
+*.env

@@ -1,0 +1,14 @@
+{
+  "name": "redsis-tools",
+  "owner": {
+    "name": "Redsis",
+    "url": "https://github.com/RedsisDevCordeiro"
+  },
+  "plugins": [
+    {
+      "name": "redsis",
+      "source": "./plugins/redsis",
+      "description": "Skills do ERP Redsis: cerebros de banco, regras e contextos, mais os procedimentos de chamado, conflitos, QA, auditoria e escrita na base."
+    }
+  ]
+}
