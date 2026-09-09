@@ -116,9 +116,16 @@ else { $mkts | Add-Member -NotePropertyName $NomeMarketplace -NotePropertyValue 
 
 # Sem isto, cada pergunta que toca a base levanta prompt de permissão — o oposto de
 # "o usuário não se preocupa com nada".
+#
+# O nome NAO e 'mcp__redsis'. Servidor MCP que vem de plugin e prefixado com
+# plugin_<plugin>_<servidor>, entao as ferramentas se chamam
+# mcp__plugin_redsis_redsis__redsis_ler e afins. Medido nesta maquina, nao deduzido.
 $perm = Garante-Propriedade $cfg 'permissions' ([pscustomobject]@{})
 $lista = @(Garante-Propriedade $perm 'allow' @())
-if ($lista -notcontains 'mcp__redsis') { $perm.allow = @($lista + 'mcp__redsis') }
+if ($lista -notcontains 'mcp__plugin_redsis_redsis') {
+    $lista = @($lista + 'mcp__plugin_redsis_redsis')
+}
+$perm.allow = $lista
 
 if ($Simular) {
     Escreve "  [simulacao] escreveria em $arquivoSettings :" Gray
