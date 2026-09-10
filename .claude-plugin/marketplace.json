@@ -1,5 +1,7 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "redsis-tools",
+  "description": "Skills do ERP Redsis. Este repositorio e apenas o ponteiro: o plugin e as bases de conhecimento sao servidos pelo servidor da Redsis, nao por aqui.",
   "owner": {
     "name": "Redsis",
     "url": "https://github.com/RedsisDevCordeiro"
@@ -7,8 +9,13 @@
   "plugins": [
     {
       "name": "redsis",
-      "source": "./plugins/redsis",
-      "description": "Skills do ERP Redsis: cerebros de banco, regras e contextos, mais os procedimentos de chamado, conflitos, QA, auditoria e escrita na base."
+      "description": "Skills do ERP Redsis. As bases de conhecimento sao servidas pelo MCP da Redsis, entao nenhum vault e copiado para esta maquina.",
+      "version": "0.2.9",
+      "source": {
+        "source": "archive",
+        "url": "https://mcp.redsis.com.br/plugin/redsis-0.2.9.zip",
+        "sha256": "bdee8fda41355b4f90e9b5d2362068021b8f0e5317342931d8cefb7a80ecbb5f"
+      }
     }
   ]
 }
