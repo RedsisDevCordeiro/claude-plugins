@@ -10,11 +10,11 @@
                     {
                         "name":  "redsis",
                         "description":  "Skills do ERP Redsis. As bases de conhecimento sao servidas pelo MCP da Redsis, entao nenhum vault e copiado para esta maquina.",
-                        "version":  "0.2.10",
+                        "version":  "0.2.11",
                         "source":  {
                                        "source":  "archive",
-                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.10.zip",
-                                       "sha256":  "074d1c085dcf0636757a153248185b54f2fffbd246283a43fb06c273b5cba247"
+                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.11.zip",
+                                       "sha256":  "4cec8eb6fc6a4c0a870af261c9bfe7702cb2d26d00b4647f6f0df058648c9732"
                                    }
                     }
                 ]
