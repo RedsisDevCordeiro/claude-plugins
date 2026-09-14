@@ -35,10 +35,14 @@ Para os outros clientes — Cursor, VS Code, Gemini CLI — o bloco de cada um e
 <https://mcp.redsis.com.br/plugin/CLIENTES-MCP.md>. Atencao: o Gemini CLI nao expande
 variavel de ambiente em `headers`, entao la o token fica literal no arquivo.
 
-Sao quatro ferramentas, somente leitura: `redsis_camada1`, `redsis_buscar`, `redsis_ler`,
-`redsis_listar`. **Comece sempre pela `redsis_camada1`** da base que a pergunta pede: e a
-camada que permite interpretar qualquer nota. Ler uma nota sem ela leva a conclusao errada,
-porque as notas assumem as convencoes como sabidas.
+As bases saem por quatro ferramentas, somente leitura: `redsis_camada1`, `redsis_buscar`,
+`redsis_ler`, `redsis_listar`. **Comece sempre pela `redsis_camada1`** da base que a pergunta
+pede: e a camada que permite interpretar qualquer nota. Ler uma nota sem ela leva a conclusao
+errada, porque as notas assumem as convencoes como sabidas.
+
+O mesmo servidor tambem compila o exe do chamado (`redsis_exe_*`) e oferece a bancada
+(`redsis_bancada_*`): o git e os arquivos do Redsis no servidor, para resolver conflito e
+montar integracao sem Delphi nem clone na maquina.
 
 ## 2. O texto dos procedimentos
 
