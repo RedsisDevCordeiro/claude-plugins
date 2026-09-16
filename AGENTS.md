@@ -68,12 +68,12 @@ Da para so olhar o indice antes de baixar, em
 
 | | |
 |---|---|
-| `cerebro-dba`, `cerebro-regras` | funcionam inteiras: sao puro MCP |
-| Os outros 6 procedimentos e `cerebro-redsis` | chamam `C:\Agentes\scripts\Resolve-BaseRedsis.ps1` por caminho absoluto; sem esse arquivo no lugar, falham |
-| `redsis-chamado` | alem disso, precisa da base de contextos clonada localmente |
+| As skills de consulta (`cerebro-*`) e o contexto dos agentes | funcionam inteiros: sao puro MCP, uma base por agente |
+| Os procedimentos que mexem no clone do Redsis (`redsis-chamado`, `redsis-excluir-branchs-mergeadas`) | precisam do Redsis clonado e das ferramentas git da maquina |
+| `Test-Ancoras.ps1` | so serve a quem mantem as skills; o zip o traz em `scripts\`, e quem o coloca no caminho absoluto e o instalador do Claude Code |
 
-O zip traz esses scripts em `scripts\`, mas quem os coloca no caminho absoluto e o
-instalador do Claude Code. Em outro agente, isso e manual.
+Os perfis de subagente vao em `agents\`: no Claude Code um agente pode consultar o outro. Em
+ferramenta que nao tem subagente, leia a base do dono direto com `redsis_camada1`.
 
 E um limite que instalador nenhum resolve: os procedimentos foram escritos para as
 ferramentas do Claude Code — `allowed-tools`, worktree, comandos git especificos. Outro
