@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "redsis": {
+      "type": "http",
+      "url": "https://mcp.redsis.com.br/mcp",
+      "headers": {
+        "Authorization": "Bearer ${REDSIS_MCP_TOKEN}"
+      },
+      "bearer_token_env_var": "REDSIS_MCP_TOKEN"
+    }
+  }
+}

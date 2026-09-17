@@ -1,7 +1,7 @@
 {
     "$schema":  "https://anthropic.com/claude-code/marketplace.schema.json",
     "name":  "redsis-tools",
-    "description":  "Skills do ERP Redsis. Este repositorio e apenas o ponteiro: o plugin e as bases de conhecimento sao servidos pelo servidor da Redsis, nao por aqui.",
+    "description":  "Skills do ERP Redsis. Para o Claude Code este catalogo aponta o plugin no servidor da Redsis; o Codex usa a copia em plugins/. As bases de conhecimento ficam no servidor, nao aqui.",
     "owner":  {
                   "name":  "Redsis",
                   "url":  "https://github.com/RedsisDevCordeiro"
@@ -10,11 +10,11 @@
                     {
                         "name":  "redsis",
                         "description":  "Skills do ERP Redsis. As bases de conhecimento, a compilacao do exe e a bancada de conflitos rodam no servidor da Redsis: nesta maquina nao e preciso vault, Delphi nem clone do Redsis.",
-                        "version":  "0.2.14",
+                        "version":  "0.2.15",
                         "source":  {
                                        "source":  "archive",
-                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.14.zip",
-                                       "sha256":  "0c95acdd12676f0ee2c8ba22f528649eb172764dd7359c6fd4529a12d2370aa4"
+                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.15.zip",
+                                       "sha256":  "1429eb6402bf072e1b5b98780ed4f3cf6aabbaefa951a00fea6b7c78035277ce"
                                    }
                     }
                 ]
