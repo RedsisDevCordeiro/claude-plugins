@@ -12,21 +12,24 @@
     resumo.json; quem decide o que fazer com falha e o agente, pelo SKILL.md.
 
     A autenticacao do SAC NAO e reimplementada. O script materializa
-    ci/scripts/sac_anexar.ps1 e ci/scripts/sac_fetch.ps1 a partir de -CiRef e os
-    chama - eles reusam o SacApi.ps1 do time, cuja credencial e DPAPI e so pode
-    ser lida pela conta Windows que a gravou.
+    ci/scripts/sac_anexar.ps1, ci/scripts/sac_fetch.ps1 e ci/scripts/sac_anexos.ps1
+    a partir de -CiRef e os chama - eles reusam o SacApi.ps1 do time, cuja
+    credencial e DPAPI e so pode ser lida pela conta Windows que a gravou.
 
     Sequencia:
       1. resolve a branch do chamado entre Tags/, Corretivos/ e Evolutivos/;
-      2. exige checkout limpo (puxar e compilar por cima de alteracao em aberto
+      2. escolhe o nome do pacote: lista os anexos do chamado e sai
+         Redsis_<codigo>, ou _2, _3... quando ja ha copia la (o SAC substitui
+         anexo de mesmo nome, e a copia anterior nao pode sumir);
+      3. exige checkout limpo (puxar e compilar por cima de alteracao em aberto
          mistura ou perde trabalho do programador);
-      3. troca para a branch e puxa origin/<branch> com --ff-only;
-      4. em Release com -Versao, ajusta VerInfo_* no .dproj, compila e RESTAURA
+      4. troca para a branch e puxa origin/<branch> com --ff-only;
+      5. em Release com -Versao, ajusta VerInfo_* no .dproj, compila e RESTAURA
          o .dproj byte a byte, conferindo por SHA-256;
-      5. compila Config/Win32 por rsvars + msbuild;
-      6. copia o exe para a pasta de trabalho e compacta em Redsis_<codigo>.rar;
-      7. le o assunto do chamado e mostra o que seria anexado;
-      8. SO com -Confirmar: envia o anexo e apaga exe e rar locais.
+      6. compila Config/Win32 por rsvars + msbuild;
+      7. copia o exe para a pasta de trabalho e compacta em <nome>.rar;
+      8. le o assunto do chamado e mostra o que seria anexado;
+      9. SO com -Confirmar: envia o anexo e apaga exe e rar locais.
 
     ESCREVE em sistema de producao que o cliente le. Sem -Confirmar nada sobe:
     o padrao imprime o que seria enviado e sai, igual ao sac_anexar.ps1.
@@ -50,9 +53,10 @@
     Autoriza o envio do anexo ao chamado. Sem ele, dry-run.
 
 .PARAMETER PularBuild
-    Reusa o Redsis_<codigo>.rar ja existente na pasta de trabalho, sem
-    recompilar. E o que permite confirmar o anexo depois do dry-run sem pagar
-    de novo os minutos de compilacao.
+    Reusa o .rar ja existente na pasta de trabalho, sem recompilar. E o que
+    permite confirmar o anexo depois do dry-run sem pagar de novo os minutos de
+    compilacao. O nome vem do resumo.json da execucao anterior: o "pode" vale
+    para o pacote que o programador viu, com o numero que ele viu.
 
 .PARAMETER SemAnexar
     Compila e compacta, e para antes de falar com o SAC.
@@ -187,6 +191,48 @@ function Mb-De {
     [math]::Round((Get-Item -LiteralPath $Caminho).Length / 1MB, 1)
 }
 
+function Materializa-Ci {
+    # A pasta ci/ nao esta na main: vem do ref do pipeline. Materializar em pasta de
+    # trabalho, e nao com 'git checkout -- ci', para nao sujar o checkout do programador.
+    # Uma vez por execucao: o nome do anexo, o assunto e o envio usam os mesmos scripts.
+    if ($script:ciDir) { return $script:ciDir }
+    $dir = Join-Path $script:trabalho 'ci'
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Git-Redsis fetch origin ($CiRef -replace '^origin/', '') | Out-Null
+    foreach ($s in 'sac_anexar.ps1', 'sac_fetch.ps1', 'sac_anexos.ps1') {
+        $conteudo = Git-Redsis show "${CiRef}:ci/scripts/$s"
+        if (-not $script:GitOk) {
+            Falha "Nao consegui ler ci/scripts/$s de $CiRef. Sem ele nao ha como falar com o SAC."
+        }
+        [System.IO.File]::WriteAllLines((Join-Path $dir $s), $conteudo,
+            (New-Object System.Text.UTF8Encoding($false)))
+    }
+    $script:ciDir = $dir
+    return $dir
+}
+
+function Proximo-Nome {
+    # Redsis_<codigo>, ou _2, _3... quando o chamado ja tem copia anexada: o SAC
+    # SUBSTITUI anexo de mesmo nome, e quem esta testando a copia anterior nao pode
+    # ve-la sumir. Mesma regra do CI (ci/lib/sac.py, proximo_nome), para as duas
+    # origens numerarem o mesmo chamado da mesma forma: compara sem extensao - o .exe
+    # e o .rar sao a mesma copia - e continua do MAIOR sufixo, nao do primeiro buraco,
+    # para a nova ser sempre a ultima da lista mesmo que apaguem uma do meio.
+    param([string]$Base, [string[]]$Existentes)
+    $rx = [regex]::new('^' + [regex]::Escape($Base) + '(?:_(\d+))?$',
+        [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    $maior = 0
+    foreach ($n in $Existentes) {
+        $m = $rx.Match([System.IO.Path]::GetFileNameWithoutExtension("$n"))
+        if ($m.Success) {
+            $numero = if ($m.Groups[1].Success) { [int]$m.Groups[1].Value } else { 1 }
+            if ($numero -gt $maior) { $maior = $numero }
+        }
+    }
+    if ($maior -eq 0) { return $Base }
+    return "${Base}_$($maior + 1)"
+}
+
 # ------------------------------------------------------------------ pre-requisitos
 $resumo.etapa = 'pre-requisitos'
 if (-not (Test-Path (Join-Path $Repo '.git'))) {
@@ -266,22 +312,72 @@ $resumo.identificador = $identificador
 $trabalho = Join-Path $PastaTrabalho $identificador
 $script:trabalho = $trabalho
 New-Item -ItemType Directory -Force -Path $trabalho | Out-Null
-$nome = "Redsis_$identificador"
-$exe = Join-Path $trabalho "$nome.exe"
-$rar = Join-Path $trabalho "$nome.rar"
+$base = "Redsis_$identificador"
+$nome = $base
 $resumo.pasta = $trabalho
 
-# Com -PularBuild o pacote e o da execucao anterior: config, branch e commit dele vem de
-# la. Lido ANTES do primeiro Salva-Resumo, que sobrescreve o arquivo.
+# Com -PularBuild o pacote e o da execucao anterior: config, branch, commit e o NOME
+# escolhido la vem de resumo.json. Lido ANTES do primeiro Salva-Resumo, que sobrescreve
+# o arquivo.
 $resumoAnterior = Join-Path $trabalho 'resumo.json'
 if ($PularBuild -and (Test-Path $resumoAnterior)) {
     try {
         $anterior = Get-Content -LiteralPath $resumoAnterior -Raw -Encoding UTF8 | ConvertFrom-Json
         if ($anterior.config) { $resumo.config = "$($anterior.config)" }
         if ($anterior.commit) { $resumo.commit = "$($anterior.commit)" }
+        if ($anterior.arquivo) {
+            # O "pode" vale para o pacote do dry-run, com o nome que o programador viu.
+            # Recalcular aqui trocaria o numero do anexo entre conferir e enviar.
+            $nome = [System.IO.Path]::GetFileNameWithoutExtension("$($anterior.arquivo)")
+        }
     }
     catch { }
 }
+
+# --------------------------------------------------------------------- nome do anexo
+# Escolhido ANTES de compilar: e ele que nomeia exe e rar, e o nome do arquivo e o nome
+# com que o anexo chega ao chamado. So quando ha chamado para receber: sem anexo
+# (integracao, download) nao ha lista com que comparar, e o nome base basta.
+if ($Chamado -and -not $SemAnexar -and -not $PularBuild) {
+    Etapa 'nome'
+    $listados = $null
+    $brutoAnexos = Join-Path $trabalho 'anexos-raw.json'
+    if (Test-Path -LiteralPath $brutoAnexos) { Remove-Item -LiteralPath $brutoAnexos -Force }
+    & powershell -NoProfile -ExecutionPolicy Bypass `
+        -File (Join-Path (Materializa-Ci) 'sac_anexos.ps1') -Codigo $Chamado -Saida $brutoAnexos 2>&1 |
+        Out-Null
+    if (Test-Path -LiteralPath $brutoAnexos) {
+        try {
+            $bruto = Get-Content -LiteralPath $brutoAnexos -Raw -Encoding UTF8 | ConvertFrom-Json
+            # Sem a propriedade 'result' a resposta nao e a lista de anexos: tratar isso
+            # como "chamado sem anexo" faria a copia sair com o nome base e SUBSTITUIR a
+            # anterior sem ninguem saber.
+            if ($null -ne $bruto -and $bruto.PSObject.Properties.Name -contains 'result') {
+                $listados = @($bruto.result | ForEach-Object { "$($_.nome)" } | Where-Object { $_ })
+            }
+        }
+        catch { $listados = $null }
+    }
+    if ($null -eq $listados) {
+        # Sem a lista nao da para saber o proximo numero. Sai com o nome base, que
+        # SUBSTITUI a copia anterior - ruim, mas melhor que deixar quem testa sem exe.
+        $resumo.anexos_lidos = $false
+        Escreve ("Nao consegui listar os anexos do chamado $Chamado - o pacote sai como " +
+                 "$base.rar e SUBSTITUI a copia anterior no chamado.") Yellow
+    }
+    else {
+        $resumo.anexos_lidos = $true
+        $resumo.anexos_no_chamado = $listados.Count
+        $nome = Proximo-Nome $base $listados
+        if ($nome -ne $base) {
+            Escreve ("O chamado $Chamado ja tem copia anexada: esta sai como $nome.rar, " +
+                     'sem substituir a anterior.') Cyan
+        }
+    }
+}
+
+$exe = Join-Path $trabalho "$nome.exe"
+$rar = Join-Path $trabalho "$nome.rar"
 Salva-Resumo
 
 $rotulo = if ($Chamado) { "Chamado $Chamado" } else { $identificador }
@@ -590,20 +686,8 @@ if ($SemAnexar) {
 }
 
 # ----------------------------------------------------------- scripts do SAC (CI)
-# A pasta ci/ nao esta na main: vem do ref do pipeline. Materializar em pasta de
-# trabalho, e nao com 'git checkout -- ci', para nao sujar o checkout do programador.
 Etapa 'sac'
-$ciDir = Join-Path $trabalho 'ci'
-New-Item -ItemType Directory -Force -Path $ciDir | Out-Null
-Git-Redsis fetch origin ($CiRef -replace '^origin/', '') | Out-Null
-foreach ($s in 'sac_anexar.ps1', 'sac_fetch.ps1') {
-    $conteudo = Git-Redsis show "${CiRef}:ci/scripts/$s"
-    if (-not $script:GitOk) {
-        Falha "Nao consegui ler ci/scripts/$s de $CiRef. Sem ele nao ha como falar com o SAC."
-    }
-    [System.IO.File]::WriteAllLines((Join-Path $ciDir $s), $conteudo,
-        (New-Object System.Text.UTF8Encoding($false)))
-}
+$ciDir = Materializa-Ci
 
 # Quem e o chamado, na fonte. Um digito errado no numero anexa dezenas de MB no
 # atendimento de outro cliente - e o assunto e o que deixa isso visivel antes.

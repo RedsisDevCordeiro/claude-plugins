@@ -24,6 +24,14 @@ o job Jenkins `Redsis Exe` no servidor, que compila, compacta e anexa:
 máquina**, e não rode o driver por `powershell`: ele é do servidor. Se as ferramentas
 `redsis_exe_*` não aparecerem, o servidor MCP não está conectado — diga isso e pare.
 
+> [!info] O SAC é do agente `SAC`
+> Esta skill compila e empacota; a parte do SAC — o que é permitido escrever no chamado, o
+> nome que o anexo recebe, o que a resposta do SAC significa — é do agente `SAC`, e se lê
+> na base dele: `redsis_ler('sac', 'escrita-no-chamado')`, `'api-de-atendimentos'`,
+> `'vocabulario-do-sac'` e `'armadilhas-da-api-do-sac'`. Quando a dúvida for de julgamento —
+> se é este chamado mesmo, o que o cliente pediu —, traga o especialista `SAC`. Regra de SAC
+> não se reescreve aqui: aqui só se obedece.
+
 ## O que o servidor compila
 
 - **A branch como está no remoto.** Sem merge da `main`, sem pull local, sem commit. O que
@@ -45,10 +53,11 @@ máquina**, e não rode o driver por `powershell`: ele é do servidor. Se as fer
 **Mencionar não aciona.** *"O que a skill faz quando eu peço o exe?"* é pergunta.
 
 > [!danger] O anexo é escrita em produção que o cliente lê
-> `redsis_exe_anexar` só entra depois de o programador ver, nesta conversa, **o número, o
-> assunto do chamado, o nome do arquivo, o tamanho e o sha256**. Um dígito errado põe
-> dezenas de MB no atendimento de outro cliente, e não há desfazer. Por isso o fluxo tem
-> duas fases, e a primeira nunca é pulada — nem quando o pedido já veio com "anexa aí".
+> Vale `sac.escrita` § "A regra das duas fases", na íntegra: `redsis_exe_anexar` só entra
+> depois de o programador ver, nesta conversa, **o número, o assunto do chamado, o nome do
+> arquivo, o tamanho e o sha256**. Um dígito errado põe dezenas de MB no atendimento de
+> outro cliente, e não há desfazer. A primeira fase nunca é pulada — nem quando o pedido já
+> veio com "anexa aí" —, e o "pode" vale para aquele chamado e aquele arquivo.
 
 ## Como conduzir
 
@@ -59,6 +68,10 @@ máquina**, e não rode o driver por `powershell`: ele é do servidor. Se as fer
    compilação leva minutos; avise o programador uma vez e relate a etapa, sem repetir texto.
 3. **DRY_RUN.** Apresente chamado, assunto, arquivo, MB e sha256 e **pergunte se pode
    anexar**. O assunto é o que denuncia número errado: se veio "assunto não lido", diga.
+   O nome do arquivo é o que o chamado vai receber, e a numeração é regra do SAC —
+   `sac.escrita` § "O nome do anexo, e por que ele é numerado": leia o nome como veio, não
+   o reescreva. Com `anexos_lidos: false` o servidor não conseguiu listar os anexos e a
+   cópia sai com o nome base, que **substitui** a anterior: diga isso antes do "pode".
 4. **Fase 2 — envio.** Com o "pode", `redsis_exe_anexar(chamado, sha256)` com o sha256
    **completo** do DRY_RUN, e de novo `redsis_exe_status` com o novo `pedido`. **Só `OK`
    prova o anexo** — enfileirar não é enviar.
@@ -105,14 +118,18 @@ O resumo volta com `FALHOU` e o motivo em `erro`. Nenhuma parada se contorna ped
 - Integrar a `main` em lote nas branches → `redsis-conflitos`
 - Revisar e votar PR já aberto → `bitbucket-pr-review`
 - Anotar parecer no chamado → é do pipeline (`ci/scripts/sac_return.py`), não daqui
+- Como o SAC funciona — rota, setor, coluna, status, o que pode ser escrito → agente `SAC`
+  (`sac.api`, `sac.vocabulario`, `sac.armadilhas`, `sac.escrita`)
 
 ## Manutenção
 
 No servidor: `mcp\servidor.py` (ferramentas), `mcp\Instalar-Exe-Remoto.ps1` (worktree
 `C:\Developer\Redsis-exe`, token e job), `mcp\Rodar-Exe-Jenkins.ps1` (ponte) e
 `Gerar-Exe.ps1 -Remoto` nesta pasta. O driver espelha `ci/config.yml` (`build.*`); se algo
-mudar lá, muda aqui. `Redsis_<número>` é nome fixo de propósito — o SAC substitui anexo
-homônimo, e cada geração sobrescreve a anterior em vez de empilhar MB no chamado.
+mudar lá, muda aqui. A regra de nome do anexo é do SAC e mora em
+`sac.escrita` § "O nome do anexo, e por que ele é numerado" — o driver e o CI
+(`ci/lib/sac.py`, `proximo_nome`) implementam **aquela** regra; mudança nela se faz lá, e
+aqui só se obedece.
 
 ```
 powershell -File "C:\Agentes\scripts\Test-Ancoras.ps1"

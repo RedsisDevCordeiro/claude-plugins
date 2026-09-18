@@ -122,10 +122,17 @@ resolvido**, que só existe no servidor — e prepara o dry-run. Acompanhe com
 `redsis_exe_status`.
 
 > [!danger] O anexo é escrita em produção que o cliente lê
-> A primeira execução **nunca** anexa, nem quando o pedido veio com "anexa aí". Mostre
-> chamado, assunto, arquivo, tamanho e sha256 e **pergunte se pode**, chamado por chamado.
-> Com o "pode": `redsis_exe_anexar(chamado, sha256)`. Um "pode" vale para **o chamado que
-> estava na tela** — não se estende aos outros do lote.
+> Vale `sac.escrita` § "A regra das duas fases", na íntegra, **chamado por chamado**: a
+> primeira execução nunca anexa, nem quando o pedido veio com "anexa aí". Mostre chamado,
+> assunto, arquivo, tamanho e sha256 e **pergunte se pode**; com o "pode",
+> `redsis_exe_anexar(chamado, sha256)`. Um "pode" vale para **o chamado que estava na tela**
+> — não se estende aos outros do lote. O nome do anexo é regra do SAC
+> (`sac.escrita` § "O nome do anexo, e por que ele é numerado"): leia-o como o dry-run deu.
+
+O SAC é do agente `SAC`: o que pode ser escrito no chamado, o que a resposta significa e o
+que os códigos de setor e coluna querem dizer se leem na base dele —
+`redsis_ler('sac', 'escrita-no-chamado')` e `'vocabulario-do-sac'`. Esta skill resolve
+conflito; regra de SAC ela obedece, não reescreve.
 
 Debug é o padrão e é o certo aqui: quem testa precisa de stack trace com linha. E diga que o
 binário veio de código que ainda não está publicado — ninguém consegue reproduzi-lo a partir
@@ -189,6 +196,8 @@ bem-sucedido não transforma sugestão em teste executado, e exe anexado não é
 - Exe de uma branch publicada, sem integração → `redsis-exe`
 - Montar a branch de integração da release → `redsis-gerar-integracao`
 - Revisar um PR já aberto → `bitbucket-pr-review`
+- Como o SAC funciona — rota, setor, coluna, status, o que pode ser escrito → agente `SAC`
+  (`sac.api`, `sac.vocabulario`, `sac.armadilhas`, `sac.escrita`)
 - Estrutura de tabela e coluna → `cerebro-dba`; regra de negócio → `cerebro-regras`
 
 ## Manutenção

@@ -10,7 +10,7 @@ MCP da Redsis, **uma base por agente especialista**, em
 `https://mcp.redsis.com.br/mcp`. Configure-o no seu cliente antes de usar qualquer
 procedimento abaixo — o passo a passo por ferramenta esta em `CLIENTES-MCP.md`.
 
-Quatro ferramentas de leitura das bases, tres do exe e as da bancada, todas no servidor:
+Quatro ferramentas de leitura das bases, tres do exe, as da bancada e as de consulta ao SAC, todas no servidor:
 
 | Ferramenta | Para que serve |
 |---|---|
@@ -22,6 +22,8 @@ Quatro ferramentas de leitura das bases, tres do exe e as da bancada, todas no s
 | `redsis_exe_status` | Acompanha o pedido de exe ate o fim. |
 | `redsis_exe_anexar` | **Escreve no SAC:** anexa o pacote conferido. So com o "pode" do programador. |
 | `redsis_bancada_*` | A copia de trabalho do servidor: git, ler, editar, duplicidade, compilar e publicar, sem Delphi nem clone na maquina de quem pede. |
+| `redsis_sac_consultar` | Consulta SOMENTE LEITURA ao SAC com o usuario de servico: fila, chamado, finalizados (POST /atendimentos/pesquisar), cadastros. |
+| `redsis_sac_chamados` | Le ate 60 chamados de uma vez: quem atendeu, quem finalizou e o texto da finalizacao. |
 
 Ler uma nota sem ter lido a camada 1 da base correspondente leva a conclusao errada:
 as notas assumem as convencoes como sabidas.
@@ -34,7 +36,7 @@ as notas assumem as convencoes como sabidas.
 | `arquitetura` | onde a logica mora: camadas, convencoes, legado, configuracao, impacto estrutural |
 | `firebird` | Firebird e SQL na aplicacao: dialeto, transacao, dataset, consulta, performance |
 | `qa` | risco, cenario de teste, auditoria pre-release |
-| `sac` | o chamado como pedido do cliente |
+| `sac` | o chamado como pedido do cliente, e a API do SAC onde ele vive |
 | `git` | branch, worktree, conflito, commit, Pull Request, integracao |
 | `fiscal`, `estoque`, `financeiro`, `comercial-rochas` | a regra de negocio da area |
 | `curador` | o que entra na base de conhecimento |
@@ -145,6 +147,14 @@ Argumentos: `[intervalo git ou branch]`
 Faz o tour de QA do ERP Redsis sobre o que foi puxado — intervalo pelo reflog, crítica de código com trecho atual e trecho sugerido, trava de assinaturas, colheita de conhecimento — e grava o relatório no servidor da Redsis. O modo diário usa o git da própria pessoa (é o que ela puxou); a cópia estável e as branches publicadas rodam só pelo servidor. Use quando o pedido for "o que puxei hoje", "as atualizações de hoje", "as correções puxadas", "analise esse pull/branch/diff", "faça uma auditoria na cópia estável", ou "treinamento". NAO audita a main contra a TAG estável (isso é redsis-auditoria) e NAO altera código.
 
 Texto completo: `skills/redsis-qa/SKILL.md`
+
+### redsis-sac
+
+Argumentos: `[o que consultar: numero, setor, periodo, cliente]`
+
+Consulta o SAC da Redsis, somente leitura, pelo servidor MCP — fila de um setor, ficha e timeline de um chamado, quem atendeu, quem finalizou e o que escreveu, finalizados por período, chamados de um cliente, cadastros de setor, coluna, assunto e tag — e varre lotes de chamados para achar finalização vazia ou mal descrita. Usa o usuário de serviço CLAUDE; quem pede não precisa de credencial do SAC. Use quando o pedido for "quem atendeu o chamado 19436169", "como foi finalizado o 19436169", "me mostra a fila do AN", "quais chamados o setor AN finalizou esta semana", "chamados abertos do cliente X", "tem finalização mal descrita no AN em setembro?" ou "consulta o SAC". NAO escreve no chamado — não anota, não move, não direciona, não finaliza e não anexa (anexo é de redsis-exe e redsis-cenarios) — e NAO corrige nem testa chamado.
+
+Texto completo: `skills/redsis-sac/SKILL.md`
 
 ## Limites
 

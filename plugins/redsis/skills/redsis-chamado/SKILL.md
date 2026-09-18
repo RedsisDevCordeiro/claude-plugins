@@ -156,6 +156,11 @@ Leia `git.commit-merge` § "Commit, aprovação e merge" e `sac.devolucao` § "D
 definem **o que** entra no commit e como o chamado é devolvido. O que muda é quem aperta o
 botão — a skill entrega o material montado, e o programador decide.
 
+Esta skill **não escreve no SAC**: nem anexo, nem anotação, nem mudança de estado. O texto de
+devolução sai pronto para colar, e quem publica é o programador — ou a skill que tem a
+ferramenta, sob `sac.escrita` § "A regra das duas fases". O que nunca vai para o chamado está
+em `sac.escrita` § "O que nenhuma skill faz sozinha".
+
 A entrega tem quatro peças, e nenhuma delas é um commit:
 
 1. **O inventário do diff**, arquivo a arquivo (`git status`, `git diff --stat`,
@@ -226,6 +231,8 @@ Branch de destino começando com `Integracoes/` muda o fluxo. Antes de qualquer 
 - Integrar a `main` em lote nas branches → `redsis-conflitos`
 - Revisar e votar PR já aberto → `bitbucket-pr-review`
 - Tour diário de QA, auditoria → skills do agente `QA`
+- O chamado no SAC — o que o cliente pediu, o que a API devolve, o que pode ser escrito lá →
+  agente `SAC` (`sac.api`, `sac.vocabulario`, `sac.armadilhas`, `sac.escrita`)
 - Estrutura do banco → `cerebro-dba` · regra de negócio → `cerebro-regras`
 - Qual contexto ler → `cerebro-redsis`
 

@@ -36,6 +36,14 @@ servidor lê a branch publicada e o chamado, e guarda o material na área de tra
 **Não procure `C:\Developer\Redsis`, `git` nem `SacApi.ps1` nesta máquina.** Se as
 ferramentas acima não aparecerem, o servidor MCP não está conectado: diga isso e pare.
 
+> [!info] O SAC é do agente `SAC`
+> O que o chamado é, o que a leitura dele traz, o que os códigos da resposta significam e o
+> que pode ser escrito lá é do agente `SAC`, e se lê na base dele:
+> `redsis_ler('sac', 'escrita-no-chamado')`, `'api-de-atendimentos'`, `'vocabulario-do-sac'`
+> e `'armadilhas-da-api-do-sac'`. Quando a dúvida for de julgamento — se o relato é
+> ambíguo, se é este chamado mesmo —, traga o especialista `SAC`. Esta skill julga o
+> **roteiro**; a regra do SAC ela obedece, não reescreve.
+
 > [!aviso] Por que o intervalo não sai de `merge-base` com a `main`
 > Medido: numa branch **já integrada**, `merge-base(main, branch)` é a própria ponta da
 > branch, e o diff sai vazio; a heurística de cair para a TAG estável mais próxima devolveu
@@ -60,10 +68,11 @@ ferramentas acima não aparecerem, o servidor MCP não está conectado: diga iss
 **Mencionar não aciona.** *"Como você monta os cenários?"* é pergunta.
 
 > [!danger] O anexo é escrita em produção que o cliente lê
-> `redsis_cenarios_anexar` só entra depois de o programador ver, nesta conversa, **o número,
-> o assunto do chamado, o nome do arquivo, o tamanho e o `sha256`**. Um dígito errado põe o
-> roteiro de um cliente no atendimento de outro, e não há desfazer. As duas fases não se
-> pulam — nem quando o pedido já veio com "anexa aí".
+> Vale `sac.escrita` § "A regra das duas fases", na íntegra: `redsis_cenarios_anexar` só
+> entra depois de o programador ver, nesta conversa, **o número, o assunto do chamado, o
+> nome do arquivo, o tamanho e o `sha256`**. Um dígito errado põe o roteiro de um cliente no
+> atendimento de outro, e não há desfazer. As duas fases não se pulam — nem quando o pedido
+> já veio com "anexa aí" —, e o "pode" morre quando o arquivo é regravado.
 
 ## Como conduzir
 
@@ -79,8 +88,12 @@ ferramentas acima não aparecerem, o servidor MCP não está conectado: diga iss
    chamado não mexeu.
 2. **Entender o defeito.** `redsis_trabalho_ler('cenarios', '<n>/ticket.md')` inteiro — o
    relato do cliente e a timeline. É ele que diz o **sintoma**, e o sintoma é o primeiro
-   cenário. Se o status parou em `FALHOU` na etapa do SAC, o roteiro nasce cego: diga isso
-   na entrega, não invente o relato a partir do diff.
+   cenário. O `ticket.md` é o chamado já limpo: entrada de timeline sem descrição é ruído de
+   movimentação, não relato (`sac.api` § "Conteúdos, tarefas e responsáveis"), e os códigos
+   de setor, coluna e status que aparecerem se traduzem por
+   `sac.vocabulario` § "Status do atendimento" e § "Movimento, a coluna do kanban" — `A` é
+   **em atendimento**, não agendado. Se o status parou em `FALHOU` na etapa do SAC, o
+   roteiro nasce cego: diga isso na entrega, não invente o relato a partir do diff.
 3. **Entender a alteração.** `diff.patch`, paginado com `inicio` e `linhas`. Para cada
    trecho: o que mudou de comportamento observável — valor, status, mensagem, registro
    gravado, filtro, permissão. Releia `coder.investigacao` § "Investigação, correção e
@@ -156,6 +169,8 @@ mensagem: texto errado no roteiro faz o testador procurar o que a tela nunca mos
 - Roteiro por chamado dentro do lote de integração → `redsis-conflitos`
 - Tour do que foi puxado, auditoria da `main` → `redsis-qa`, `redsis-auditoria`
 - Script automatizado do TestComplete → não é aqui; esta skill entrega roteiro humano
+- Como o SAC funciona — rota, setor, coluna, status, o que pode ser escrito → agente `SAC`
+  (`sac.api`, `sac.vocabulario`, `sac.armadilhas`, `sac.escrita`)
 - Estrutura do banco → `cerebro-dba` · regra de negócio → `cerebro-regras`
 
 O roteiro que vai no `solucao.md` durante o atendimento continua sendo de `redsis-chamado`.
@@ -165,11 +180,12 @@ antes de escrever. Ele mora na máquina dele e não passa pelo servidor.
 
 ## Manutenção
 
-Se esta skill divergir da seção canônica, **vale a seção**. As ferramentas vivem no
-servidor: `mcp\servidor.py` (git por referência, área de trabalho, coleta) e
-`mcp\Sac-Cenarios.ps1` (leitura e anexo no SAC, pelo job `Redsis Exe`, porque só a conta do
-Jenkins abre a credencial DPAPI). A mecânica de SAC espelha a do `Gerar-Exe.ps1`
-(`ci/scripts/*` de `origin/Evolutivos/ci-pipeline`); mudança de lá muda aqui.
+Se esta skill divergir da seção canônica, **vale a seção**; se divergir do SAC, vale
+`sac.escrita`. As ferramentas vivem no servidor: `mcp\servidor.py` (git por referência, área
+de trabalho, coleta) e `mcp\Sac-Cenarios.ps1` (leitura e anexo no SAC, pelo job `Redsis Exe`,
+porque só a conta do Jenkins abre a credencial DPAPI — `sac.escrita` § "Quem escreve no SAC
+hoje"). A mecânica de SAC espelha a do `Gerar-Exe.ps1` (`ci/scripts/*` de
+`origin/Evolutivos/ci-pipeline`); mudança de lá muda aqui.
 
 ```
 powershell -File "C:\Agentes\scripts\Test-Ancoras.ps1"

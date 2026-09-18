@@ -12,7 +12,7 @@ verdade — ao contrário das skills, que recebem frase e não argumento posicio
 | `arquitetura` | onde a lógica mora: camadas, convenções, legado, configuração, impacto estrutural |
 | `firebird` | Firebird e SQL na aplicação: dialeto, transação, dataset, consulta, parâmetro, performance |
 | `qa` | risco, cenário de teste, auditoria pré-release |
-| `sac` | o chamado como pedido do cliente |
+| `sac` | o chamado como pedido do cliente, e a API do SAC: rotas, setor, coluna, status, armadilhas e a regra de escrita no chamado |
 | `git` | branch, worktree, conflito, commit, Pull Request, integração |
 | `fiscal`, `estoque`, `financeiro`, `comercial-rochas` | a regra de negócio da área |
 | `curador` | o que entra na base de conhecimento |
@@ -155,6 +155,32 @@ A coleta resolve a branch no `origin`, delimita a alteração pelos commits que 
 área `cenarios`; o job lê o chamado no SAC e grava `ticket.md` (status `COLETADO`). O anexo
 só aceita o `cenarios-de-teste-<n>.md` gravado, com o `sha256` da gravação e o número do
 chamado no título.
+
+As duas escritas possíveis no SAC são de anexo — `redsis_exe_anexar` e
+`redsis_cenarios_anexar` —, e as duas obedecem à regra do agente `SAC`
+(`sac.escrita` § "A regra das duas fases"). Não existe ferramenta para anotar, movimentar,
+direcionar ou finalizar chamado: essas rotas existem na API (`sac.api`) e não estão ligadas a
+nenhum agente.
+
+## As da consulta ao SAC (skill `redsis-sac`)
+
+Somente leitura, com o usuário de serviço `CLAUDE`, pelo job `Redsis Exe` — a credencial do
+SAC só abre na conta do Jenkins. Cada ferramenta espera até ~45 s; se o job estiver ocupado com
+um exe, devolve `NA_FILA` e o `identificador` para `redsis_exe_status`.
+
+| Ferramenta | Parâmetros | Obrigatório | Devolve |
+|---|---|---|---|
+| `redsis_sac_consultar` | `rota`, `parametros`, `corpo`, `campos`, `nome`, `aguardar_segundos` | `rota` | tabela de até 40 linhas; a resposta crua em `<nome>/resposta.json` na área `sac` |
+| `redsis_sac_chamados` | `codigos` (até 60), `nome`, `aguardar_segundos` | `codigos` | quem atendeu, quem finalizou e o texto da finalização; `<codigo>.json`, `<codigo>.md` e `indice.tsv` na área `sac` |
+
+`rota` vai sem query string — os filtros vão em `parametros` (ex. `{'setor': 'AN'}`). `corpo`
+só existe para `POST /atendimentos/pesquisar`, a rota que lista finalizados, com os campos
+`cliente`, `assunto`, `atendente`, `setor`, `situacao`, `data_inicial`, `data_final`, `filtro`,
+`pesquisa` e `grupo`. A allowlist de leitura está no servidor e no job; rota de escrita é
+recusada nos dois. Sem `nome`, a pasta ganha um nome aleatório; repetir um `nome` apaga a
+consulta anterior com esse nome. Em `pesquisar`, `atendente` e `cliente` são códigos
+(`codatendpref`, `codpessoa`): nome é recusado, porque o SAC o ignora e devolve tudo. A área
+`sac` apaga sozinha a consulta com mais de 7 dias.
 
 ## `redsis_skills` (skill `redsis-ajuda`)
 
