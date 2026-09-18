@@ -33,9 +33,9 @@ Jenkins —, e a resposta crua fica na área de trabalho `sac`, pasta `<nome>/`.
 
 | Ferramenta | Faz | Escreve no SAC? |
 |---|---|---|
-| `redsis_sac_consultar(rota, parametros, corpo, campos, nome)` | uma rota de leitura; devolve tabela resumida e grava `resposta.json` | não |
-| `redsis_sac_chamados(codigos, nome)` | até 60 chamados num pedido só; devolve quem atendeu, quem finalizou e o texto da finalização; grava `<codigo>.json`, `<codigo>.md` e `indice.tsv` | não |
-| `redsis_exe_status(identificador='sac-<nome>')` | acompanha o pedido quando a espera de ~45 s não bastou | não |
+| `redsis_sac_consultar(rota, parametros, corpo, campos, agrupar, nome)` | uma rota de leitura; devolve tabela resumida, conta no servidor com `agrupar` e grava `registros.tsv` (um registro por linha) | não |
+| `redsis_sac_chamados(codigos \| de_consulta, amostra, semente, nome)` | até 500 chamados num pedido (~0,5 s cada); devolve quem atendeu, quem finalizou, o texto da finalização e a faixa de tamanho dele; grava `<codigo>.json`, `<codigo>.md` e `indice.tsv` | não |
+| `redsis_exe_status(identificador='sac-<nome>')` | acompanha o pedido quando a espera de ~45 s não bastou — e entrega a tabela quando ele termina | não |
 | `redsis_trabalho_listar` / `redsis_trabalho_ler('sac', ...)` | lê o que a consulta gravou, paginado | não |
 
 **Não procure `SacApi.ps1`, token nem `curl` nesta máquina.** Se as ferramentas acima não
@@ -63,8 +63,13 @@ diga isso e pare.
 | os códigos de setor, coluna, assunto, tag | `'/atendimentos/tipos'`, `'/atendimentos/movimentos/AN'`, `'/atendimentos/assuntos'`, `'/atendimentos/tags'` |
 
 `campos` escolhe as colunas do resumo (ex. `['codigo', 'assunto', 'atendpref']`); sem ele
-saem as que respondem "quem e quando". A tabela mostra 40 linhas; o resto está no arquivo.
-`nome` batiza a pasta — repetir um nome **apaga** a consulta anterior com esse nome.
+saem as que respondem "quem e quando". A tabela mostra 40 linhas; **todas** estão em
+`<nome>/registros.tsv`, uma por linha — pagine com `redsis_trabalho_ler('sac',
+'<nome>/registros.tsv', inicio, linhas)`. **Não leia `resposta.json`**: é o bruto do SAC numa
+linha só, e a leitura corta em ~120 KB (medido: 145 de 10.301 registros). `agrupar` conta no
+servidor, sem ler registro nenhum na conversa — `agrupar=['codatendpref']` dá quantos
+chamados cada atendente tem no recorte. `nome` batiza a pasta — repetir um nome **apaga** a
+consulta anterior com esse nome.
 
 Em `pesquisar`, `atendente` é o `codatendpref` e `cliente` é o `codpessoa` — códigos. Nome é
 **ignorado pelo SAC sem erro** e devolve tudo (`sac.armadilhas` § "Caminhos e contratos que a
@@ -73,10 +78,19 @@ de alguém, faça a consulta sem o filtro e leia a coluna `codatendpref` ou `cod
 
 ## Varrer finalização mal descrita
 
-1. **Achar os finalizados.** `/atendimentos/pesquisar` com `situacao: 'F'`, o setor e o
-   período. Anote quantos vieram.
-2. **Ler em lotes.** `redsis_sac_chamados` com até 60 códigos por vez, um `nome` por lote
-   (`fin-an-set-1`, `fin-an-set-2`...).
+1. **Achar os finalizados, com o denominador.** `/atendimentos/pesquisar` com
+   `situacao: 'F'`, o setor e o período, um `nome` (ex. `fin-at-jul-set`) e
+   `agrupar=['codatendpref']`. Anote o total e quantos cada atendente finalizou: sem o
+   denominador, "3 de fulano" não diz nada — 3 em 40 e 3 em 900 são coisas diferentes.
+2. **Sortear, nunca pegar os primeiros.** `redsis_sac_chamados(de_consulta='fin-at-jul-set',
+   amostra=400, nome='fin-at-jul-set-a400')`. O servidor sorteia os códigos da consulta sem
+   passar pela conversa; a `semente` que ele devolve repete o mesmo sorteio. A lista do
+   `pesquisar` vem **em ordem de `data_finalizacao`**: os primeiros N são o primeiro dia do
+   período, não uma amostra — medido, os 145 primeiros de 10.301 finalizados do AT eram
+   todos de 20/07. 400 sorteados estimam a proporção do todo com margem de ~±5 pontos;
+   leva ~4 min de job, e o `redsis_exe_status` entrega a tabela quando terminar. Até 500 por
+   pedido. Recorte pequeno (até 500) pode ser lido inteiro: `de_consulta` sem `amostra`.
+   Censo de milhares não cabe aqui: é ~0,5 s por chamado na fila que compila o exe.
 3. **Separar pelo número, julgar pelo texto.** `finalizacao_chars` é o tamanho do texto que o
    atendente escreveu na entrada `<USUARIO> finalizou no setor ...` da timeline — `0` é
    finalização sem texto. `ultima_entrada` no `indice.tsv` denuncia chamado que andou depois
@@ -85,7 +99,9 @@ de alguém, faça a consulta sem o filtro e leia a coluna `codatendpref` ou `cod
    dizer que está mal descrita.
 4. **Relatar por chamado, com a evidência.** Código, quem finalizou, o texto como está e o
    que falta nele — causa, o que foi feito, como o cliente confere. Critério declarado,
-   não impressão.
+   não impressão. O número que vale para o setor é a **proporção na amostra**, com a margem
+   e a semente; contagem por pessoa dentro de uma amostra de 400 espalhada por dezenas de
+   atendentes é pequena demais para comparar gente, e o relatório diz isso.
 
 > [!danger] Isto avalia o trabalho de uma pessoa nomeada
 > `atendpref`, `atenddirec` e o título da finalização dizem quem fez. Relatório de
