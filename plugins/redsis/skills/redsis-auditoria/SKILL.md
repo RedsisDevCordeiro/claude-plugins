@@ -39,8 +39,10 @@ A TAG estável é a de `Versão estável atual` no `comum.gatilhos` — hoje `4.
 
 > [!danger] Sem o servidor, não há rodada
 > O `estado.md`, os checkpoints e a numeração dos pré-chamados moram na área `auditoria` do
-> servidor. Se as ferramentas acima não aparecerem ou não responderem, **diga isso e pare**
-> na etapa que depende delas. Não invente destino, não crie a fila em outro lugar e não siga
+> servidor. Se as ferramentas acima não estiverem carregadas, procure-as pelo nome exato — no
+> Codex, com `tool_search`: lá nenhuma ferramenta MCP vem carregada, e a busca devolve só 8 por
+> vez. Se nem a busca pelo nome as trouxer, ou se não responderem, **diga isso e pare** na
+> etapa que depende delas. Não invente destino, não crie a fila em outro lugar e não siga
 > como se o histórico existisse.
 
 ## Os três modos — o gatilho escolhe o intervalo

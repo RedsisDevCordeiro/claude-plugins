@@ -76,6 +76,14 @@ Responde qual regra de negocio o ERP Redsis aplica — o que ele exige, calcula,
 
 Texto completo: `skills/cerebro-regras/SKILL.md`
 
+### redsis-acbr
+
+Argumentos: `[revisao|HEAD] [so-reinstalar]`
+
+Atualiza o ACBr DESTA máquina — `svn update` na pasta do ACBr e reinstalação pelo `ACBrInstall_Trunk2.exe` conduzida sozinha, sem clicar no assistente — e só declara pronto quando o log do instalador confirma os pacotes compilados e instalados. Use quando o pedido for "atualiza o ACBr", "dá update no ACBr e reinstala", "roda o ACBrInstall", "reinstala o ACBr", "o ACBr está desatualizado", "o Redsis não compila por causa do ACBr", "o Delphi perdeu os componentes do ACBr" ou "volta o ACBr para a revisão N". NAO compila nem corrige o Redsis (isso é redsis-chamado), NAO gera exe no servidor (isso é redsis-exe) e NAO mexe no ACBr de outra máquina.
+
+Texto completo: `skills/redsis-acbr/SKILL.md`
+
 ### redsis-ajuda
 
 Argumentos: `[nome da skill ou o que você quer fazer]`

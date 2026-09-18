@@ -22,7 +22,9 @@ o job Jenkins `Redsis Exe` no servidor, que compila, compacta e anexa:
 
 **Não procure Delphi, `rsvars.bat`, `C:\Developer\Redsis` nem `Gerar-Exe.ps1` nesta
 máquina**, e não rode o driver por `powershell`: ele é do servidor. Se as ferramentas
-`redsis_exe_*` não aparecerem, o servidor MCP não está conectado — diga isso e pare.
+`redsis_exe_*` não estiverem carregadas, procure-as pelo nome exato — no Codex, com
+`tool_search`: lá nenhuma ferramenta MCP vem carregada, e a busca devolve só 8 por vez. Só se
+a busca pelo nome não as trouxer o servidor MCP não está conectado — diga isso e pare.
 
 > [!info] O SAC é do agente `SAC`
 > Esta skill compila e empacota; a parte do SAC — o que é permitido escrever no chamado, o

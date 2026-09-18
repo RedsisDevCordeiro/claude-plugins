@@ -39,8 +39,10 @@ Jenkins —, e a resposta crua fica na área de trabalho `sac`, pasta `<nome>/`.
 | `redsis_trabalho_listar` / `redsis_trabalho_ler('sac', ...)` | lê o que a consulta gravou, paginado | não |
 
 **Não procure `SacApi.ps1`, token nem `curl` nesta máquina.** Se as ferramentas acima não
-aparecerem, o servidor MCP não está conectado, ou o plugin é anterior a elas: diga isso e
-pare.
+estiverem carregadas, procure-as pelo nome exato — no Codex, com `tool_search`: lá nenhuma
+ferramenta MCP vem carregada, e a busca devolve só 8 por vez. Só se a busca pelo nome não as
+trouxer o servidor MCP não está conectado, ou a sessão foi aberta antes de ele publicá-las:
+diga isso e pare.
 
 > [!aviso] A consulta entra na fila do exe
 > O job é o mesmo que compila o executável, e roda um pedido por vez. Com um exe

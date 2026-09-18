@@ -23,8 +23,9 @@ redsis_skills(skill="redsis-chamado")
 redsis_skills(skill="redsis-chamado", completo=true)
 ```
 
-Se `redsis_skills` não aparecer, o servidor MCP não está conectado: diga isso e pare — não
-responda o catálogo de memória.
+Se `redsis_skills` não estiver carregada, procure-a pelo nome exato — no Codex, com
+`tool_search`: lá nenhuma ferramenta MCP vem carregada. Só se a busca pelo nome não a trouxer
+o servidor MCP não está conectado: diga isso e pare — não responda o catálogo de memória.
 
 ## Como conduzir
 
@@ -66,8 +67,10 @@ Três coisas diferentes usam a mesma palavra, e trocá-las gera pedido que não 
 As rotinas não rodam script nesta máquina: o trabalho sai pelas ferramentas do servidor. A
 `redsis-exe`, por exemplo, recebe parâmetro de ferramenta MCP —
 `redsis_exe_gerar(chamado="19436169", config="Release", versao="4.1.15.17")`. As exceções,
-por natureza, são duas: `redsis-chamado` compila e testa com o Delphi de quem atende, e
-`redsis-excluir-branchs-mergeadas` apaga branch do clone local de quem pede.
+por natureza, são três: `redsis-chamado` compila e testa com o Delphi de quem atende,
+`redsis-excluir-branchs-mergeadas` apaga branch do clone local de quem pede, e `redsis-acbr`
+atualiza e reinstala o ACBr da própria máquina, rodando o `Atualizar-ACBr.ps1` que vem na
+pasta dela.
 
 `argument-hint` **não é sintaxe de linha de comando**: é lembrete do dado que falta.
 "gera o exe do chamado 19436169 em release" já traz os dois.

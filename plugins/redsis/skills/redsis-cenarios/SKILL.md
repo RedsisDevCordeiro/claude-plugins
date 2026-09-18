@@ -34,7 +34,9 @@ servidor lê a branch publicada e o chamado, e guarda o material na área de tra
 | `redsis_cenarios_anexar` | anexa o `.md` conferido | **sim** |
 
 **Não procure `C:\Developer\Redsis`, `git` nem `SacApi.ps1` nesta máquina.** Se as
-ferramentas acima não aparecerem, o servidor MCP não está conectado: diga isso e pare.
+ferramentas acima não estiverem carregadas, procure-as pelo nome exato — no Codex, com
+`tool_search`: lá nenhuma ferramenta MCP vem carregada, e a busca devolve só 8 por vez. Só se
+a busca pelo nome não as trouxer o servidor MCP não está conectado: diga isso e pare.
 
 > [!info] O SAC é do agente `SAC`
 > O que o chamado é, o que a leitura dele traz, o que os códigos da resposta significam e o
