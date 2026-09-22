@@ -156,11 +156,22 @@ A coleta resolve a branch no `origin`, delimita a alteração pelos commits que 
 só aceita o `cenarios-de-teste-<n>.md` gravado, com o `sha256` da gravação e o número do
 chamado no título.
 
-As duas escritas possíveis no SAC são de anexo — `redsis_exe_anexar` e
-`redsis_cenarios_anexar` —, e as duas obedecem à regra do agente `SAC`
-(`sac.escrita` § "A regra das duas fases"). Não existe ferramenta para anotar, movimentar,
-direcionar ou finalizar chamado: essas rotas existem na API (`sac.api`) e não estão ligadas a
-nenhum agente.
+As escritas possíveis no SAC são três — os anexos `redsis_exe_anexar` e
+`redsis_cenarios_anexar`, e a anotação por tag `redsis_faq_anotar` —, e as três obedecem à
+regra do agente `SAC` (`sac.escrita` § "A regra das duas fases"). Não existe ferramenta para
+anotar outra coisa, movimentar, direcionar ou finalizar chamado: essas rotas existem na API
+(`sac.api`) e não estão ligadas a nenhum agente.
+
+## As do FAQ de versão (skill `redsis-anotar-tag`)
+
+| Ferramenta | Parâmetros | Obrigatório | Devolve |
+|---|---|---|---|
+| `redsis_faq_preparar` | `tag`, `titulo_faq`, `itens` (`[{chamado, tipo C\|E, texto}]`, até 200) | os três | o `pedido` da prévia; siga com `redsis_exe_status(identificador='faq-<tag>')` até `DRY_RUN` |
+| `redsis_faq_anotar` | `tag`, `sha256` | os dois | o pedido da escrita — só `OK` no status prova que tudo foi escrito |
+
+O `texto` é só o texto-base no padrão 8856 (`Descrição do Problema:`/`Solução:` ou
+`Solicitação:`/`Implementação:`); a árvore, o `ID FAQ:` e o `[<chamado>]` o servidor põe. A
+prévia fica em `<tag>/previa.md` na área `faq`, e o relato da escrita em `<tag>/resultado.md`.
 
 ## As da consulta ao SAC (skill `redsis-sac`)
 

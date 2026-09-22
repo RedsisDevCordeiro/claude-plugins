@@ -325,6 +325,10 @@ if ($PularBuild -and (Test-Path $resumoAnterior)) {
         $anterior = Get-Content -LiteralPath $resumoAnterior -Raw -Encoding UTF8 | ConvertFrom-Json
         if ($anterior.config) { $resumo.config = "$($anterior.config)" }
         if ($anterior.commit) { $resumo.commit = "$($anterior.commit)" }
+        # A branch tambem e a do dry-run, e nao uma resolvida de novo: o pacote da bancada
+        # nasce em trabalho/<x>, que so existe no servidor e nunca foi publicada.
+        if ($anterior.branch) { $resumo.branch = "$($anterior.branch)" }
+        if ($anterior.pull) { $resumo.pull = "$($anterior.pull)" }
         if ($anterior.arquivo) {
             # O "pode" vale para o pacote do dry-run, com o nome que o programador viu.
             # Recalcular aqui trocaria o numero do anexo entre conferir e enviar.
@@ -385,7 +389,14 @@ Escreve "$rotulo  |  $Config/Win32  |  pasta de trabalho: $trabalho" Cyan
 
 # ------------------------------------------------------------------------- branch
 Etapa 'branch'
-if ($SemCheckout) {
+if ($PularBuild) {
+    # Anexo: nada e compilado nem posicionado, e a branch ja veio do resumo do dry-run.
+    # Resolver de novo aqui so podia falhar - o pacote da bancada nasce em trabalho/<x>,
+    # que nao existe em origin, e a branch do chamado pode ter sido apagada entre o
+    # dry-run e o "pode".
+    $alvo = "$($resumo.branch)"
+}
+elseif ($SemCheckout) {
     # A bancada ja esta posicionada: compilar o que esta ali, inclusive merge resolvido
     # e ainda nao commitado. Tocar em branch aqui descartaria exatamente esse trabalho.
     $alvo = "$(Git-Redsis rev-parse --abbrev-ref HEAD | Select-Object -First 1)".Trim()
@@ -400,8 +411,8 @@ elseif ($Remoto) {
     Git-Redsis fetch --prune origin | Out-Null
     if (-not $script:GitOk) { Falha 'Nao consegui atualizar as referencias de origin.' }
 }
-if ($SemCheckout) {
-    # $alvo ja veio do HEAD da bancada, acima: nao ha o que resolver.
+if ($PularBuild -or $SemCheckout) {
+    # $alvo ja veio do resumo do dry-run ou do HEAD da bancada, acima: nada a resolver.
 }
 elseif ($Branch) {
     $alvo = $Branch

@@ -1,7 +1,7 @@
 {
     "name":  "redsis",
     "displayName":  "Redsis",
-    "version":  "0.2.19",
+    "version":  "0.2.20",
     "description":  "Skills do ERP Redsis. As bases de conhecimento, a compilacao do exe e a bancada de conflitos rodam no servidor da Redsis: nesta maquina nao e preciso vault, Delphi nem clone do Redsis.",
     "author":  {
                    "name":  "Redsis"

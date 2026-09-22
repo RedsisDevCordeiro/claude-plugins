@@ -1,6 +1,6 @@
 ---
 name: redsis-sac
-description: Consulta o SAC da Redsis, somente leitura, pelo servidor MCP — fila de um setor, ficha e timeline de um chamado, quem atendeu, quem finalizou e o que escreveu, finalizados por período, chamados de um cliente, cadastros de setor, coluna, assunto e tag — e varre lotes de chamados para achar finalização vazia ou mal descrita. Usa o usuário de serviço CLAUDE; quem pede não precisa de credencial do SAC. Use quando o pedido for "quem atendeu o chamado 19436169", "como foi finalizado o 19436169", "me mostra a fila do AN", "quais chamados o setor AN finalizou esta semana", "chamados abertos do cliente X", "tem finalização mal descrita no AN em setembro?" ou "consulta o SAC". NAO escreve no chamado — não anota, não move, não direciona, não finaliza e não anexa (anexo é de redsis-exe e redsis-cenarios) — e NAO corrige nem testa chamado.
+description: Consulta o SAC da Redsis, somente leitura, pelo servidor MCP — fila de um setor, ficha e timeline de um chamado, quem atendeu, quem finalizou e o que escreveu, finalizados por período, chamados de um cliente, cadastros de setor, coluna, assunto e tag — e varre lotes de chamados para achar finalização vazia ou mal descrita. Usa o usuário de serviço CLAUDE; quem pede não precisa de credencial do SAC. Use quando o pedido for "quem atendeu o chamado 19436169", "como foi finalizado o 19436169", "me mostra a fila do AN", "quais chamados o setor AN finalizou esta semana", "chamados abertos do cliente X", "tem finalização mal descrita no AN em setembro?" ou "consulta o SAC". NAO escreve no chamado — não anota, não move, não direciona, não finaliza e não anexa (anexo é de redsis-exe e redsis-cenarios; a anotação dos chamados de uma tag no FAQ de versão é de redsis-anotar-tag) — e NAO corrige nem testa chamado.
 argument-hint: "[o que consultar: numero, setor, periodo, cliente]"
 allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_sac_consultar mcp__plugin_redsis_redsis__redsis_sac_consultar mcp__redsis__redsis_sac_chamados mcp__plugin_redsis_redsis__redsis_sac_chamados mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status mcp__redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_ler
 ---
@@ -141,6 +141,7 @@ de alguém, faça a consulta sem o filtro e leia a coluna `codatendpref` ou `cod
 
 - Corrigir o chamado, preparar o teste → `redsis-chamado`
 - Roteiro de teste do chamado → `redsis-cenarios`
+- Anotar os chamados de uma tag no FAQ de versão → `redsis-anotar-tag`
 - Exe no chamado → `redsis-exe`
 - O que a rota faz, o que o código significa → agente `SAC` (`sac.api`, `sac.vocabulario`,
   `sac.armadilhas`, `sac.escrita`)

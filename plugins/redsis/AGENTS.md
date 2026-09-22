@@ -92,6 +92,14 @@ Explica o que cada skill do plugin Redsis faz quando é chamada, o que a dispara
 
 Texto completo: `skills/redsis-ajuda/SKILL.md`
 
+### redsis-anotar-tag
+
+Argumentos: `<TAG> <TITULO_FAQ>  ex.: 4.1.15.23 \"Redsis 4.1.15.23\`
+
+Anota os chamados do SAC marcados com uma tag de versão no FAQ de versão pendente — em cada chamado, o texto no padrão do usuário 8856 terminado em `ID FAQ: <n>`; no FAQ, um item com a árvore de rastreio, o mesmo texto e `[<chamado>]`. Tudo pelo servidor MCP da Redsis — quem pede não precisa de credencial do SAC, script nem PowerShell. Use quando o pedido for "anota os chamados da tag 4.1.15.23 no FAQ Redsis 4.1.15.23", "fecha a tag X no FAQ Y", "joga os chamados da versão no FAQ" ou `/redsis-anotar-tag <TAG> <TITULO_FAQ>`. NAO finaliza, move nem direciona chamado, NAO edita nem apaga item de FAQ já criado e NAO aprova o FAQ.
+
+Texto completo: `skills/redsis-anotar-tag/SKILL.md`
+
 ### redsis-auditoria
 
 Argumentos: `[TAG ou modo]`
@@ -160,7 +168,7 @@ Texto completo: `skills/redsis-qa/SKILL.md`
 
 Argumentos: `[o que consultar: numero, setor, periodo, cliente]`
 
-Consulta o SAC da Redsis, somente leitura, pelo servidor MCP — fila de um setor, ficha e timeline de um chamado, quem atendeu, quem finalizou e o que escreveu, finalizados por período, chamados de um cliente, cadastros de setor, coluna, assunto e tag — e varre lotes de chamados para achar finalização vazia ou mal descrita. Usa o usuário de serviço CLAUDE; quem pede não precisa de credencial do SAC. Use quando o pedido for "quem atendeu o chamado 19436169", "como foi finalizado o 19436169", "me mostra a fila do AN", "quais chamados o setor AN finalizou esta semana", "chamados abertos do cliente X", "tem finalização mal descrita no AN em setembro?" ou "consulta o SAC". NAO escreve no chamado — não anota, não move, não direciona, não finaliza e não anexa (anexo é de redsis-exe e redsis-cenarios) — e NAO corrige nem testa chamado.
+Consulta o SAC da Redsis, somente leitura, pelo servidor MCP — fila de um setor, ficha e timeline de um chamado, quem atendeu, quem finalizou e o que escreveu, finalizados por período, chamados de um cliente, cadastros de setor, coluna, assunto e tag — e varre lotes de chamados para achar finalização vazia ou mal descrita. Usa o usuário de serviço CLAUDE; quem pede não precisa de credencial do SAC. Use quando o pedido for "quem atendeu o chamado 19436169", "como foi finalizado o 19436169", "me mostra a fila do AN", "quais chamados o setor AN finalizou esta semana", "chamados abertos do cliente X", "tem finalização mal descrita no AN em setembro?" ou "consulta o SAC". NAO escreve no chamado — não anota, não move, não direciona, não finaliza e não anexa (anexo é de redsis-exe e redsis-cenarios; a anotação dos chamados de uma tag no FAQ de versão é de redsis-anotar-tag) — e NAO corrige nem testa chamado.
 
 Texto completo: `skills/redsis-sac/SKILL.md`
 

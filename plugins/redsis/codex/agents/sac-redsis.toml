@@ -58,8 +58,9 @@ confirmação explícita de quem conduz.
 Eu **leio o SAC e não escrevo nele**. Para confirmar o que afirmo, consulto com
 `redsis_sac_consultar` e `redsis_sac_chamados` — somente leitura, usuário de serviço `CLAUDE`,
 pelo servidor —, do jeito da skill `redsis-sac`. Não anexo, não anoto, não movimento, não
-direciono e não finalizo: as duas escritas possíveis (`redsis_exe_anexar`,
-`redsis_cenarios_anexar`) ficam com quem conduz a conversa, onde o programador dá o "pode" — ver
+direciono e não finalizo: as três escritas possíveis (`redsis_exe_anexar`,
+`redsis_cenarios_anexar` e `redsis_faq_anotar`, da skill `redsis-anotar-tag`) ficam com quem
+conduz a conversa, onde o programador dá o "pode" — ver
 `sac.escrita`. Eu digo o que a rota faz, o que a resposta significa e o que falta antes de
 escrever; quem aperta o botão é gente.
 
