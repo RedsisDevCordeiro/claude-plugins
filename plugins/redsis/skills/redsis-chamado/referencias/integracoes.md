@@ -1,7 +1,9 @@
 # Integrações especiais — `Integracoes/Integracao_<versão>`
 
-Leia isto **antes de qualquer etapa** quando a branch de destino começar com `Integracoes/`.
-Não é gatilho de frase: é a categoria da branch que muda o fluxo.
+Leia isto **antes de qualquer etapa** quando a branch de destino for a própria integração,
+`Integracoes/Integracao_<...>`. Não é gatilho de frase: é a categoria da branch que muda o fluxo.
+O chamado de integração, `Integracoes/<número do chamado>`, **não** passa por aqui: é um
+corretivo filho da integração vigente (`comum.branch-mae`) e segue o ciclo comum.
 
 A fonte canônica é `git.integracoes-especiais` § "Integrações especiais (`Integracoes/`)". Este
 arquivo lista só os **deltas** em relação ao ciclo comum — o resto do fluxo continua valendo.

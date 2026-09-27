@@ -122,7 +122,7 @@ toda chamada leva a referência — `origin/main`, `origin/<branch>`, TAG ou has
 falha em voz alta em vez de responder vazio. Opção que leria arquivo do servidor ou
 executaria programa (`--no-index`, `--contents`, `grep -f`, `-O`...) é recusada.
 
-## A área de trabalho (skills `redsis-qa`, `redsis-auditoria`, `redsis-cenarios`, `redsis-conflitos`)
+## A área de trabalho (skills `redsis-qa`, `redsis-auditoria`, `redsis-cenarios`, `redsis-conflitos`, `redsis-chamado`)
 
 O que precisa sobreviver à sessão e ser o mesmo para todo mundo mora no servidor.
 
@@ -132,6 +132,8 @@ O que precisa sobreviver à sessão e ser o mesmo para todo mundo mora no servid
 | `auditoria` | a fila `bug-estavel-para-main`: `estado.md`, `auditorias/`, `P0`..`P3/` |
 | `cenarios` | `<chamado>/`: material coletado e `cenarios-de-teste-<n>.md` |
 | `conflitos` | `<branch com - no lugar de />/`: `arquivos.md` e `sugestoes-para-testes.md` |
+| `testes-unitarios` | `<chamado>/`: o teste DUnitX do chamado e o `LEIAME.md` — em `C:\Agentes\Testes unitários` |
+| `regras-pendentes` | `<chamado>/`: fichas de regra extraídas do chamado, esperando autorização humana — em `C:\Agentes\Regras de negócio\Pendentes de autorização`, fora do vault |
 
 | Ferramenta | Parâmetros | Devolve |
 |---|---|---|
@@ -139,7 +141,7 @@ O que precisa sobreviver à sessão e ser o mesmo para todo mundo mora no servid
 | `redsis_trabalho_ler` | `area`, `caminho`, `inicio`, `linhas` | o arquivo numerado **e o `sha256`** |
 | `redsis_trabalho_gravar` | `area`, `caminho`, `conteudo`, `sha256_anterior` | tamanho e `sha256` gravados |
 
-Grava só `.md` e `.txt`, em UTF-8. **Nunca sobrescreve às cegas**: arquivo que já existe só
+Grava `.md` e `.txt`, em UTF-8; na área `testes-unitarios`, também `.pas`, `.dpr` e `.inc` (em Windows-1252 com CRLF, como o fonte do Redsis) e `.dproj`. **Nunca sobrescreve às cegas**: arquivo que já existe só
 é substituído com `sha256_anterior` igual ao da leitura — sem ele, ou se alguém mudou o
 arquivo no meio, nada é gravado.
 
