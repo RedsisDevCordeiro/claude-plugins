@@ -34,7 +34,7 @@ Jenkins —, e a resposta crua fica na área de trabalho `sac`, pasta `<nome>/`.
 | Ferramenta | Faz | Escreve no SAC? |
 |---|---|---|
 | `redsis_sac_consultar(rota, parametros, corpo, campos, agrupar, nome)` | uma rota de leitura; devolve tabela resumida, conta no servidor com `agrupar` e grava `registros.tsv` (um registro por linha) | não |
-| `redsis_sac_chamados(codigos \| de_consulta, amostra, semente, nome)` | até 500 chamados num pedido (~0,5 s cada); devolve quem atendeu, quem finalizou, o texto da finalização e a faixa de tamanho dele; grava `<codigo>.json`, `<codigo>.md` e `indice.tsv` | não |
+| `redsis_sac_chamados(codigos \| de_consulta, amostra, semente, nome)` | até 10.000 chamados num pedido, 8 ao mesmo tempo (~3 min por 1.000); sem `amostra`, lê todos os da consulta; devolve quem finalizou, o texto da finalização, a triagem do servidor e a contagem exata por quem finalizou; grava `<codigo>.json`, `<codigo>.md`, `indice.tsv`, `por_finalizador.tsv` e `revisar.tsv` | não |
 | `redsis_exe_status(identificador='sac-<nome>')` | acompanha o pedido quando a espera de ~45 s não bastou — e entrega a tabela quando ele termina | não |
 | `redsis_trabalho_listar` / `redsis_trabalho_ler('sac', ...)` | lê o que a consulta gravou, paginado | não |
 
@@ -47,7 +47,8 @@ diga isso e pare.
 > [!aviso] A consulta entra na fila do exe
 > O job é o mesmo que compila o executável, e roda um pedido por vez. Com um exe
 > compilando, a consulta espera — a ferramenta devolve `NA_FILA` e o `identificador`; siga
-> com `redsis_exe_status`. Não repita a consulta: cada repetição é mais um pedido na fila.
+> com `redsis_exe_status`. Não repita a consulta: cada repetição é mais um pedido na fila. E o
+> contrário também vale: ler um mês inteiro de finalizados do AT ocupa a fila por ~15 min.
 
 ## As receitas
 
@@ -78,34 +79,54 @@ de alguém, faça a consulta sem o filtro e leia a coluna `codatendpref` ou `cod
 
 ## Varrer finalização mal descrita
 
-1. **Achar os finalizados, com o denominador.** `/atendimentos/pesquisar` com
-   `situacao: 'F'`, o setor e o período, um `nome` (ex. `fin-at-jul-set`) e
-   `agrupar=['codatendpref']`. Anote o total e quantos cada atendente finalizou: sem o
-   denominador, "3 de fulano" não diz nada — 3 em 40 e 3 em 900 são coisas diferentes.
-2. **Sortear, nunca pegar os primeiros.** `redsis_sac_chamados(de_consulta='fin-at-jul-set',
-   amostra=400, nome='fin-at-jul-set-a400')`. O servidor sorteia os códigos da consulta sem
-   passar pela conversa; a `semente` que ele devolve repete o mesmo sorteio. A lista do
-   `pesquisar` vem **em ordem de `data_finalizacao`**: os primeiros N são o primeiro dia do
-   período, não uma amostra — medido, os 145 primeiros de 10.301 finalizados do AT eram
-   todos de 20/07. 400 sorteados estimam a proporção do todo com margem de ~±5 pontos;
-   leva ~4 min de job, e o `redsis_exe_status` entrega a tabela quando terminar. Até 500 por
-   pedido. Recorte pequeno (até 500) pode ser lido inteiro: `de_consulta` sem `amostra`.
-   Censo de milhares não cabe aqui: é ~0,5 s por chamado na fila que compila o exe.
-3. **Separar pelo número, julgar pelo texto.** `finalizacao_chars` é o tamanho do texto que o
-   atendente escreveu na entrada `<USUARIO> finalizou no setor ...` da timeline — `0` é
-   finalização sem texto. `ultima_entrada` no `indice.tsv` denuncia chamado que andou depois
-   de finalizado. Número baixo **não prova** descrição ruim: um "Executável disponível no
-   site, versão 4.1.15.21" é curto e completo para quem testa. Leia o `<codigo>.md` antes de
-   dizer que está mal descrita.
-4. **Relatar por chamado, com a evidência.** Código, quem finalizou, o texto como está e o
-   que falta nele — causa, o que foi feito, como o cliente confere. Critério declarado,
-   não impressão. O número que vale para o setor é a **proporção na amostra**, com a margem
-   e a semente; contagem por pessoa dentro de uma amostra de 400 espalhada por dezenas de
-   atendentes é pequena demais para comparar gente, e o relatório diz isso.
+"Quem finalizou mal" é pergunta sobre **cada** chamado do recorte: a resposta sai do lote
+**inteiro**. Amostra só estima a proporção do setor e nunca aponta pessoa — medido em
+27/09/2026, uma amostra de 400 dos 4.793 finalizados do AT em agosto, com 62 históricos lidos,
+deu uma lista de exemplos, não a resposta.
+
+1. **Achar os finalizados.** `/atendimentos/pesquisar` com `situacao: 'F'`, o setor e o
+   período, e um `nome` (ex. `fin-at-ago`). Anote o total. Passou de 10.000? Parta o período
+   (quinzena a quinzena) e faça os passos 2 a 5 em cada parte.
+2. **Ler todos.** `redsis_sac_chamados(de_consulta='fin-at-ago', nome='fin-at-ago-todos')`,
+   **sem `amostra`**. O job lê 8 chamados ao mesmo tempo — ~3 min por 1.000 depois de
+   começar, na fila do exe (medido: 4.793 em ~14 min). Volta `EM_ANDAMENTO`: siga com
+   `redsis_exe_status(identificador='sac-fin-at-ago-todos')` até a tabela; a `etapa` mostra
+   quantos já foram. Não repita o pedido.
+3. **Contar o que o servidor decide.** Cada chamado lido ganha um `sinal`, pela mesma regra
+   para todos: `sem texto`, `generica` (ok, resolvido, feito, "..." — a lista fixa
+   `FINALIZACAO_VAZIA` do `servidor.py`), `sem registro de finalizacao`, `repete o pedido`
+   (o texto está contido no pedido do cliente) ou vazio (`a julgar`). A tabela por quem
+   finalizou (`por_finalizador.tsv`) é **contagem exata**: o denominador de cada pessoa é o que
+   ela finalizou no recorte — 3 em 40 e 3 em 900 são coisas diferentes.
+4. **Julgar o resto, todas as linhas.** `revisar.tsv` traz o que o servidor não decide — uma
+   linha por chamado: código, quem finalizou, sinal, assunto, o pedido do cliente (a entrada
+   "criou" da timeline; a `observacao` do registro é o aviso fixo do cliente, não o pedido) e
+   o texto da finalização, do mais curto ao mais longo. Leia **o arquivo inteiro**:
+   `redsis_trabalho_ler('sac', '<nome>/revisar.tsv', inicio, 300)`, página a página; se vier
+   `[... cortado ...]`, peça menos linhas. Com mais de ~600 linhas, reparta as páginas entre
+   subagentes do especialista `SAC` em paralelo — cada um recebe o intervalo de linhas e o
+   critério do passo 5, e devolve só os reprovados (código, quem, o texto, o que falta) e
+   quantas linhas leu. Some as linhas lidas: a soma tem de bater com o total do arquivo. Sem
+   subagente, pagine você mesmo. Nenhuma linha fica sem julgamento.
+5. **Julgar pelo critério declarado, não pela impressão.** Finalização boa diz o que foi feito
+   (ou a causa) e o desfecho — o bastante para quem reabrir o chamado entender sem ler o
+   resto. **Reprova:** só o tema ("Emissão de nota", "AUXILIO SPED CONTRIB"), só a pergunta
+   sem a resposta, o pedido repetido sem providência, palavra solta ("sefaz"). **Não
+   reprova:** motivo completo, mesmo curto — "chamado duplicado", "cliente desistiu",
+   "Executável disponível no site, versão 4.1.15.21". Tamanho **não prova** nada, nem para
+   baixo nem para cima. Na dúvida, leia `<codigo>.md`, a timeline inteira: se uma anotação
+   explica o que a finalização não diz, a finalização continua reprovada — a pergunta é sobre
+   ela —, e o relatório registra que o histórico cobre.
+6. **Relatar com os números exatos.** Por pessoa: quantos finalizou, quantos reprovados (os
+   que o servidor decidiu mais os julgados) e os chamados, cada um com o texto como está e o
+   que falta. E a cobertura: lidos de pedidos, falhos (com o motivo), linhas de `revisar.tsv`
+   julgadas de quantas. Lote inteiro não tem margem de erro; se algum passo ficou parcial,
+   o relatório diz qual e quanto — nunca apresenta parcial como total.
 
 > [!danger] Isto avalia o trabalho de uma pessoa nomeada
 > `atendpref`, `atenddirec` e o título da finalização dizem quem fez. Relatório de
-> qualidade cita o chamado e o texto, não ranqueia gente; hipótese fica marcada como
+> qualidade cita o chamado e o texto, e a contagem por pessoa vai sempre com o denominador
+> exato — nunca de amostra, e sem virar ranking de gente; hipótese fica marcada como
 > hipótese; e o relatório vai para quem pediu, não para o chamado. Nenhum texto desta
 > varredura se grava no SAC.
 

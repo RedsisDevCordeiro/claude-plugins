@@ -184,13 +184,14 @@ um exe, devolve `NA_FILA` e o `identificador` para `redsis_exe_status`.
 | Ferramenta | Parâmetros | Obrigatório | Devolve |
 |---|---|---|---|
 | `redsis_sac_consultar` | `rota`, `parametros`, `corpo`, `campos`, `agrupar` (até 3 campos), `nome`, `aguardar_segundos` | `rota` | tabela de até 40 linhas e a contagem de `agrupar`; todos os registros em `<nome>/registros.tsv`, um por linha, na área `sac` |
-| `redsis_sac_chamados` | `codigos` **ou** `de_consulta`, `amostra`, `semente`, `nome`, `aguardar_segundos` | um dos dois primeiros | até 500 chamados: quem atendeu, quem finalizou, o texto da finalização e a faixa de tamanho; `<codigo>.json`, `<codigo>.md` e `indice.tsv` na área `sac` |
+| `redsis_sac_chamados` | `codigos` **ou** `de_consulta`, `amostra`, `semente`, `nome`, `aguardar_segundos` | um dos dois primeiros | até 10.000 chamados, 8 ao mesmo tempo: quem finalizou, o texto da finalização, a triagem do servidor e a contagem exata por quem finalizou; `<codigo>.json`, `<codigo>.md`, `indice.tsv`, `por_finalizador.tsv` e `revisar.tsv` na área `sac` |
 
 `de_consulta` é o `nome` de uma consulta anterior: o servidor lê os códigos dela sem passar pela
-conversa, e `amostra=N` sorteia N (a `semente` devolvida repete o sorteio). É o jeito de
-auditar milhares de finalizados — os primeiros registros de `pesquisar` são os mais antigos,
-não uma amostra. Lote que passa da espera termina pelo `redsis_exe_status`, que monta a
-tabela. `resposta.json` é o bruto numa linha só: leia `registros.tsv`.
+conversa — sem `amostra`, todos (~3 min por 1.000; um mês de finalizados do AT, ~15 min).
+`amostra=N` sorteia N (a `semente` devolvida repete o sorteio): só para estimar proporção,
+nunca para dizer quem. `revisar.tsv` é o que o servidor não decide sozinho, uma linha por
+chamado, para o agente julgar inteiro. Lote que passa da espera termina pelo
+`redsis_exe_status`, que monta a tabela. `resposta.json` é o bruto numa linha só: leia `registros.tsv`.
 
 `rota` vai sem query string — os filtros vão em `parametros` (ex. `{'setor': 'AN'}`). `corpo`
 só existe para `POST /atendimentos/pesquisar`, a rota que lista finalizados, com os campos
