@@ -1,6 +1,6 @@
 ---
 name: redsis-chamado
-description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — classifica pelo SAC (Tags, Corretivos, Evolutivos, Integracoes) sem precisar que o programador diga, cria sozinha a pasta, a branch e a worktree que faltarem, traz do SAC os anexos e o banco do chamado, triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
+description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — classifica pelo SAC (Tags, Corretivos, Evolutivos, Integracoes) sem precisar que o programador diga, cria sozinha a pasta, a branch e a worktree que faltarem, traz do SAC os anexos e o banco do chamado, desenvolve na worktree (vários chamados ao mesmo tempo) e no teste passa a alteração para o C:\Developer\Redsis, triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
 argument-hint: "[numero-do-chamado]"
 allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_gravar mcp__redsis__redsis_sac_consultar mcp__plugin_redsis_redsis__redsis_sac_consultar mcp__redsis__redsis_sac_anexos mcp__plugin_redsis_redsis__redsis_sac_anexos mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git rev-parse:*) Bash(git merge-base:*) Bash(git worktree list:*) Bash(git branch --list:*) Bash(git blame:*) Bash(git reflog:*)
 ---
@@ -15,9 +15,10 @@ O chamado é uma **máquina de estados sobre os mesmos artefatos**: o número, a
 Por isso os gatilhos vivem numa skill só: cada um depende do estado que o anterior deixou,
 e escolher a etapa errada pula validação.
 
-A máquina termina **antes** do Git que publica: a skill investiga, corrige e prepara o teste
-dentro da worktree, e entrega a alteração **em aberto** — não commitada, não mesclada — para
-o programador conferir e comitar com as próprias mãos.
+A máquina termina **antes** do Git que publica: a skill investiga e corrige dentro da
+worktree — vários chamados ao mesmo tempo —, passa a alteração para o `C:\Developer\Redsis`
+quando o programador vai testar, e entrega a alteração **em aberto** — não commitada, não
+mesclada — para ele conferir e comitar pelo SourceTree.
 
 ## O que esta skill não faz
 
@@ -35,8 +36,9 @@ agente publicava a branch e abria o PR. Ela continua valendo para **o que** vai 
 destino, fechamento da branch — e deixa de valer para **quem executa**, que agora é sempre o
 programador. Nesse ponto, e só nesse, vale este arquivo.
 
-O isolamento não muda: worktree própria por chamado, branch de destino intacta no checkout
-principal, nenhuma alteração alheia tocada.
+O isolamento não muda: worktree própria por chamado durante o desenvolvimento, o checkout
+principal só tocado na passagem para o teste e só se estiver sem pendência, nenhuma
+alteração alheia tocada.
 
 Gravar no servidor da Redsis **não** é publicar no Git: o teste unitário e as regras de negócio
 pendentes vão para as áreas `testes-unitarios` e `regras-pendentes` do servidor MCP, fora do
@@ -85,9 +87,9 @@ O gatilho seleciona a etapa **e** define o que fica autorizado. Errar na direç�
 | Gatilho | Pré-condição | Autoriza | NÃO autoriza |
 |---|---|---|---|
 | `preciso resolver o chamado <n>` | o número do chamado | classificação pelo SAC, criação da pasta, do `problema.txt`, da branch local e da worktree, download dos anexos do SAC e montagem do `DBCOM.RED`, triagem, correção, teste unitário na pasta do chamado, regra de negócio em `regras-pendentes`, `solucao.md` | commit, merge, push, PR |
-| `vou testar` / `quero testar` | correção apresentada | cópia e validação do banco + Debug/Win32 **compilado na worktree** | commit, merge, push, PR |
-| `me mostra o que mudou` | worktree com alteração | inventário do diff, revisão, `solucao.md` atualizado | apagar ou mover o teste unitário; commit, merge, push, PR |
-| `terminei esse chamado` | worktree com alteração | o mesmo, `solucao.md` fechado com o resumo da causa, teste unitário gravado no servidor **e** apagado da máquina depois de conferido, comandos prontos de commit | **executar** commit, merge, push ou PR |
+| `vou testar` / `quero testar` | correção apresentada; `C:\Developer\Redsis` sem pendência | passar a alteração da worktree para o `C:\Developer\Redsis` e apagar a worktree, cópia e validação do banco, Debug/Win32 no `C:\Developer\Redsis` | commit, merge, push, PR; mexer em pendência que já estava no `C:\Developer\Redsis` |
+| `me mostra o que mudou` | alteração na worktree ou no `C:\Developer\Redsis` | inventário do diff, revisão, `solucao.md` atualizado | apagar ou mover o teste unitário; commit, merge, push, PR |
+| `terminei esse chamado` | alteração na worktree ou no `C:\Developer\Redsis` | o mesmo, `solucao.md` fechado com o resumo da causa, teste unitário gravado no servidor **e** apagado da máquina depois de conferido, lista dos arquivos e mensagem de commit para a aba `Redsis` do SourceTree | **executar** commit, merge, push ou PR |
 | `finalizar em Release` | Debug testado e aprovado | ajustar version info, compilar Release/Win32, copiar, restaurar o `.dproj` | comitar a alteração temporária de versão |
 
 Três consequências que costumam ser violadas:
@@ -133,11 +135,14 @@ Depois, **crie o que faltar, sem pedir** (`sac.acionamento` § "Pasta, branch e 
 - a branch de destino (`Tags/<n>`, `Corretivos/<n>`, `Evolutivos/<n>` ou `Integracoes/<n>`),
   local, a partir de `origin/<mãe>` depois de `git fetch origin` — criar não é publicar, e o
   push continua sendo do programador;
-- a worktree `<pasta>\worktree`, aberta **direto na branch do chamado** — sem branch de trabalho
-  separada: a alteração fica em aberto na própria branch do chamado, e o programador comita
-  dali, sem merge (`git.worktree` § "Worktree e branches"). Se a branch estiver aberta no
-  checkout principal ou em outra worktree, parar e dizer onde — nunca `--force`. Chamado
-  antigo que já tem `codex/<n>` ou `Work/<n>` com trabalho continua nela.
+- a worktree `<pasta>\Redsis-<n>`, aberta **direto na branch do chamado** — sem branch de
+  trabalho separada: a alteração fica em aberto na própria branch do chamado e, no
+  `vou testar`, passa para o `C:\Developer\Redsis` (`git.worktree` § "Worktree e branches"). Branch nova nasce com
+  `git branch --no-track <branch> origin/<mãe>`: sem o `--no-track`, ela rastrearia a mãe e o
+  push do SourceTree ofereceria mandar o commit para a `main`. Branch do chamado já no
+  `C:\Developer\Redsis` sem pendência (chamado que voltou dos testes): atender ali, sem
+  worktree. Aberta em outra worktree, ou no principal com pendência: parar e dizer onde —
+  nunca `--force`. Chamado antigo que já tem `codex/<n>` ou `Work/<n>` continua nela.
 
 O sufixo ` - retornado` **não** entra em número, branch, worktree nem commit. Nunca `--force`.
 
@@ -189,7 +194,8 @@ Leia `coder.teste-unitario` § "O que o teste prova" e
 `coder.teste-unitario` § "Onde o teste vive durante o atendimento". Junto com a correção nasce
 um teste DUnitX em
 `C:\Developer\chamados\<n>\testes-unitarios\` — fora da worktree, fora do Git, fora do
-`Redsis.dproj` e fora do commit. O teste chama o código de produção **da worktree** e cobre, no
+`Redsis.dproj` e fora do commit. O teste chama o código de produção **de onde a alteração está**
+— a worktree e, depois do `vou testar`, o `C:\Developer\Redsis` — e cobre, no
 mínimo, o caso do chamado e a intenção preservada. Compilar e rodar
 (§ "Como compilar e rodar") e registrar o resultado no `solucao.md`. Teste que copia a lógica
 para dentro de si não conta. Quando o código não se deixa testar, vale
@@ -208,23 +214,32 @@ Regra de negócio confirmada durante o chamado — o que o sistema exige, calcul
 fonte. A ficha **não** vira conhecimento de agente até um humano autorizar — então não a cite
 como regra vigente. Hipótese não vira ficha; sem regra nova, não se inventa ficha.
 
-## Etapa 3 — teste, dentro da worktree
+## Etapa 3 — teste, no `C:\Developer\Redsis`
 
-Leia `coder.ambiente-teste` § "Preparação do ambiente para teste". A ordem não admite atalho; o
-que muda em relação à seção é **onde**: sem merge, a alteração só existe na worktree, e é
-nela que o teste roda.
+Leia `coder.ambiente-teste` § "Preparação do ambiente para teste" e
+`git.worktree` § "Passagem da worktree para o checkout principal". O chamado sai da worktree e
+vai para o checkout principal, onde já estão o banco de teste e o alias do programador. A
+ordem não admite atalho:
 
-1. confirmar que a worktree é a do chamado e que o diff dela é só do chamado;
-2. copiar `C:\Developer\chamados\<n>\DBCOM.RED` → `C:\Developer\Clientes\bug\DBCOM.RED`;
-3. validar por **tamanho e SHA-256**;
-4. compilar o `Projects\Redsis\Redsis.dproj` **da worktree** em `Debug`/`Win32`;
+1. conferir que o `C:\Developer\Redsis` está sem pendência — só o `Redsis.res` da compilação
+   anterior é restaurado; qualquer outra pendência é do programador ou de outro chamado em
+   teste: parar e dizer qual, sem guardar nem descartar nada;
+2. passar a alteração: `.patch` de segurança na pasta do chamado, stash na worktree, worktree
+   apagada, `C:\Developer\Redsis` na branch do chamado, stash aplicado e descartado — a
+   alteração fica **pendente**, sem commit, na aba `Redsis` do SourceTree;
+3. copiar `C:\Developer\chamados\<n>\DBCOM.RED` → `C:\Developer\Clientes\bug\DBCOM.RED` e validar
+   por **tamanho e SHA-256**;
+4. compilar o `C:\Developer\Redsis\Projects\Redsis\Redsis.dproj` em `Debug`/`Win32`;
 5. só então abrir o `Redsis.exe` gerado por essa compilação.
+
+Um chamado em teste por vez: os outros esperam nas worktrees deles. Ajuste pedido durante o
+teste é feito direto no `C:\Developer\Redsis`.
 
 > [!danger] É proibido contornar essa sequência
 > Executável renomeado, alias, pasta `.codex-test`, cópia isolada do programa ou conexão
 > direta ao `DBCOM.RED` da pasta do chamado — nada disso vale. Informar o caminho do banco
-> **não substitui a cópia**. E o `Redsis.exe` do checkout principal **não serve**: ele não
-> tem a alteração, que está na worktree e nunca foi mesclada. Se alguma etapa foi pulada,
+> **não substitui a cópia**. E compilar ou abrir antes da passagem não serve: o
+> `C:\Developer\Redsis` ainda não tem a alteração. Se alguma etapa foi pulada,
 > encerrar o desvio, declarar que a preparação foi inválida e refazer da primeira etapa não
 > comprovada.
 
@@ -264,24 +279,26 @@ A entrega tem seis peças, e nenhuma delas é um commit:
    `C:\Agentes\Regras de negócio\Pendentes de autorização\`. Sem ficha, dizer "nenhuma".
    Outro conhecimento descoberto vira proposta no `solucao.md`, conforme
    `regra.atualizacao-base` § "Colheita pelo servidor MCP".
-5. **Os comandos prontos**, escritos para o programador colar quando decidir, de dentro da
-   worktree: `git add` dos arquivos do chamado, o commit com assunto `[<número>] descrição objetiva`
-   (`regra.git` § "Procedimento padrão de commit") e o `git push -u origin <branch do chamado>`.
-   Não há merge: o commit já nasce na branch do chamado. A skill escreve; ele executa.
+5. **O commit pelo SourceTree, sem comando**: a lista exata dos arquivos do chamado a marcar
+   na aba `Redsis` (o `C:\Developer\Redsis`, depois do `vou testar`), a mensagem pronta para colar, no formato `[<número>] descrição objetiva`
+   (`regra.git` § "Procedimento padrão de commit"), e o caminho — Status do arquivo, marcar,
+   Commit, Push com Rastrear. Avisar para deixar o `Redsis.res` desmarcado quando ele aparecer
+   só pela compilação. Não há merge: o commit já nasce na branch do chamado. Comando de git só
+   para quem não usa o SourceTree, e só se pedir.
 6. **O resumo da causa, por último**, em `Tags/`, `Corretivos/` e `Integracoes/<n>`: o mesmo
    bloco que fecha o `solucao.md` — problema do chamado, qual alteração de qual chamado o
    causou, qual correção foi feita. É a última coisa da mensagem de entrega. Causa não
    confirmada se diz assim, com o suspeito e o que foi investigado; nunca se elege culpado
    por semelhança de assunto.
 
-A worktree **fica de pé** ao fim do atendimento: é o ambiente isolado onde a alteração
-espera o commit. Limpar a worktree, empacotar e publicar são etapas de depois do commit —
-logo, não são desta skill.
+A worktree vive até o `vou testar`: a passagem a apaga. Chamado que termina sem teste —
+raro — continua na worktree dele; para comitar pelo SourceTree, o programador pede o
+`vou testar` ou abre a pasta da worktree no SourceTree. A branch do chamado fica.
 
 ### Quando o pedido for `finalizar em Release`
 
 Leia `coder.compilacao` § "Compilação e empacotamento final". Vale a mesma regra de lugar da
-etapa 3: a Release sai da **worktree**, do Debug já testado e aprovado — alteração posterior
+etapa 3: a Release sai do **`C:\Developer\Redsis`**, do Debug já testado e aprovado — alteração posterior
 ao teste exige novo Debug e novo teste antes. Ajustar o version info, compilar
 `Release`/`Win32`, copiar e **restaurar o `.dproj`** ao estado anterior: a alteração de
 versão é temporária e, como tudo aqui, não vira commit.
@@ -324,7 +341,8 @@ Dois tipos de branch começam com `Integracoes/`, e só um deles muda o fluxo:
 
 > [!danger] Integrar também não é comitar
 > Integração é, por natureza, um commit — e continua sendo do programador. A skill resolve
-> os conflitos na worktree da própria branch da integração, com a integração **em aberto**
+> os conflitos direto no `C:\Developer\Redsis`, sem worktree — merge em andamento não passa
+> de uma pasta para outra —, com a integração **em aberto**
 > (`git merge --no-commit`, `git cherry-pick -n`), apresenta o resultado e para. Concluir é o commit dele. Deixar o
 > repositório em estado de merge é deliberado: é o "em aberto" desta categoria, e a entrega
 > tem de dizer isso com todas as letras, junto do comando que conclui.

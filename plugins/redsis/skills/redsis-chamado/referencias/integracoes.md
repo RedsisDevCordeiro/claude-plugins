@@ -19,8 +19,9 @@ está sincronizada com o remoto. Origem explícita informada pelo programador pr
 
 ## Resolução de conflito
 
-Abrir a worktree direto na branch de destino `Integracoes/Integracao_<versão>` e integrar a
-origem nela **sem concluir o commit** (`git merge --no-commit`, `git cherry-pick -n`): a integração fica
+Sem worktree: merge em andamento não passa de uma pasta para outra. No `C:\Developer\Redsis`,
+sem pendência, trocar para a branch `Integracoes/Integracao_<versão>` e integrar a origem nela
+**sem concluir o commit** (`git merge --no-commit`, `git cherry-pick -n`): a integração fica
 resolvida e em aberto, e quem comita é o programador. Antes de decidir conflito semântico:
 comparar ancestral comum, commits exclusivos e histórico dos trechos.
 
@@ -45,7 +46,7 @@ dos anexos dele (`sac.acionamento` § "Anexos do chamado").
 ## Teste e Release
 
 Primeiro teste em `Debug`/`Win32`, com banco copiado e validado, usando o executável compilado
-na worktree da integração.
+no `C:\Developer\Redsis`.
 
 A Release versionada sai **somente** depois de o programador confirmar o sucesso do teste em
 Debug **e** pedir. Então: validar que os quatro componentes coincidem com o identificador,
