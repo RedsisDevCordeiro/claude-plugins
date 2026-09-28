@@ -1,8 +1,8 @@
 ---
 name: redsis-chamado
-description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
+description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — classifica pelo SAC (Tags, Corretivos, Evolutivos, Integracoes) sem precisar que o programador diga, cria sozinha a pasta, a branch e a worktree que faltarem, triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
 argument-hint: "[numero-do-chamado]"
-allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_gravar Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git rev-parse:*) Bash(git merge-base:*) Bash(git worktree list:*) Bash(git branch --list:*) Bash(git blame:*) Bash(git reflog:*)
+allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_gravar mcp__redsis__redsis_sac_consultar mcp__plugin_redsis_redsis__redsis_sac_consultar Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git rev-parse:*) Bash(git merge-base:*) Bash(git worktree list:*) Bash(git branch --list:*) Bash(git blame:*) Bash(git reflog:*)
 ---
 
 # Ciclo de chamado Redsis
@@ -11,7 +11,7 @@ Este arquivo é **roteador, não procedimento**. O fluxo canônico vive na base 
 é relido a cada gatilho — inclusive quando esta conversa já o consultou.
 
 O chamado é uma **máquina de estados sobre os mesmos artefatos**: o número, a pasta
-`C:\Developer\chamados\<n>\`, a branch de destino, a worktree `codex/<n>` e o `solucao.md`.
+`C:\Developer\chamados\<n>\`, a branch de destino, a worktree `Work/<n>` e o `solucao.md`.
 Por isso os gatilhos vivem numa skill só: cada um depende do estado que o anterior deixou,
 e escolher a etapa errada pula validação.
 
@@ -51,10 +51,11 @@ A camada 1 traz o índice geral: ele diz qual agente é dono de cada ID. Nota de
 lê na base dele — `redsis_ler(<base do dono>, <alvo>)` — ou se pergunta ao especialista,
 quando a resposta exigir julgamento da área dele.
 
-> [!danger] Nesta máquina `C:\Developer\chamados` não existe
-> Os artefatos do chamado (`problema.txt`, `DBCOM.RED`, `solucao.md`) moram na máquina do
-> programador. Se a pasta faltar, **diga isso e pare na etapa que depende dela** — não
-> invente destino, não crie a pasta e não siga como se o artefato existisse.
+> [!important] O que falta, a skill cria — o que vem do cliente, não
+> Pasta do chamado (e `C:\Developer\chamados\`, se faltar), `problema.txt` transcrito do SAC,
+> branch de destino e worktree: a skill cria sozinha, sem pedir ao programador. O `DBCOM.RED` e
+> os anexos vêm do cliente e **não** se inventam: se faltarem, diga isso e siga até a etapa que
+> depende deles — a preparação do teste.
 
 O fonte é `C:\Developer\Redsis` (Bitbucket `redsisdev/release`).
 
@@ -81,7 +82,7 @@ O gatilho seleciona a etapa **e** define o que fica autorizado. Errar na direç�
 
 | Gatilho | Pré-condição | Autoriza | NÃO autoriza |
 |---|---|---|---|
-| `preciso resolver o chamado <n>` | pasta do chamado localizada | triagem, branch, worktree, correção, teste unitário na pasta do chamado, regra de negócio em `regras-pendentes`, `solucao.md` | commit, merge, push, PR |
+| `preciso resolver o chamado <n>` | o número do chamado | classificação pelo SAC, criação da pasta, do `problema.txt`, da branch local e da worktree, triagem, correção, teste unitário na pasta do chamado, regra de negócio em `regras-pendentes`, `solucao.md` | commit, merge, push, PR |
 | `vou testar` / `quero testar` | correção apresentada | cópia e validação do banco + Debug/Win32 **compilado na worktree** | commit, merge, push, PR |
 | `me mostra o que mudou` | worktree com alteração | inventário do diff, revisão, `solucao.md` atualizado | apagar ou mover o teste unitário; commit, merge, push, PR |
 | `terminei esse chamado` | worktree com alteração | o mesmo, `solucao.md` fechado com o resumo da causa, teste unitário gravado no servidor **e** apagado da máquina depois de conferido, comandos prontos de commit | **executar** commit, merge, push ou PR |
@@ -100,12 +101,32 @@ Três consequências que costumam ser violadas:
 Leia `sac.acionamento` § "Acionamento", `sac.artefatos` § "Diretório e artefatos do chamado",
 `git.worktree` § "Worktree e branches" e `sac.banco` § "Banco do chamado".
 
-O que não pode ser esquecido: a pasta tipada define a categoria e **autoriza criar a branch**
-(`tags-<n>` → `Tags/<n>`, `evolutivos-<n>` → `Evolutivos/<n>`, `corretivos-<n>` →
-`Corretivos/<n>`, `integracoes-<n>` → `Integracoes/<n>`); a pasta legada **só com o número
-não autoriza** — exige branch já criada. O sufixo ` - retornado` **não** entra em número,
-branch, worktree nem commit. Criar a worktree é obrigação do agente, não do usuário. Nunca
-`--force`.
+O programador não precisa dizer o tipo do chamado. Leia
+`sac.acionamento` § "Classificação do chamado" e classifique nesta ordem:
+
+1. o tipo que o programador disse no chat, se disse — vence o SAC;
+2. senão, o SAC, lido pelo servidor com
+   `redsis_sac_consultar(rota='/atendimentos/<n>', nome='chamado-<n>')`: no setor `PG` a coluna
+   é o tipo (`73` Tags, `16` Corretivos, `18`/`23` Evolutivos, `108` Integrações); fora do `PG`,
+   o último `movimentou de ... para <coluna>` da timeline, e só então a coluna atual do `AN`;
+3. nada classifica (`Notas Técnicas`, `Pendências`, sem coluna, SAC fora do ar) → perguntar.
+   Nunca adivinhar pelo assunto.
+
+Diga na primeira resposta qual foi a classificação e de onde ela veio (chat, coluna do `PG`,
+timeline ou coluna do `AN`). O prefixo de uma pasta que já existe não classifica — é só nome;
+divergindo, siga a classificação e avise, sem renomear a pasta.
+
+Depois, **crie o que faltar, sem pedir** (`sac.acionamento` § "Pasta, branch e worktree"):
+
+- a pasta `C:\Developer\chamados\<prefixo>-<n>` (`tags-`, `corretivos-`, `evolutivos-`,
+  `integracoes-`), se não houver pasta nenhuma para o número;
+- o `problema.txt`, transcrito da timeline do SAC, se faltar;
+- a branch de destino (`Tags/<n>`, `Corretivos/<n>`, `Evolutivos/<n>` ou `Integracoes/<n>`),
+  local, a partir de `origin/<mãe>` depois de `git fetch origin` — criar não é publicar, e o
+  push continua sendo do programador;
+- a worktree com `Work/<n>` (`git.worktree` § "Worktree e branches").
+
+O sufixo ` - retornado` **não** entra em número, branch, worktree nem commit. Nunca `--force`.
 
 Cada categoria nasce de uma branch-mãe, e duas das mães mudam com o tempo. Leia
 `comum.branch-mae` § "Como a mãe muda" antes de criar a branch — é o único lugar que diz a
@@ -121,8 +142,9 @@ A mãe vigente vale para branch **nova**: chamado já aberto continua filho da m
 (`comum.branch-mae` § "Regras que valem para todas as categorias"). Mãe que não existe no
 remoto: parar e perguntar.
 
-Prefixo da pasta em conflito com branch existente de outra categoria: **interromper e
-comunicar**, não escolher.
+Branch que já existe de outra categoria que a classificada (existe `Corretivos/<n>` e o SAC
+diz Tags), ou branches de duas categorias para o mesmo número: **interromper e comunicar**, não
+escolher — as mães são diferentes, e trocar exige decisão do programador.
 
 Banco do chamado: só leitura por padrão, SQL compatível com Firebird 2.5, e a cascata de
 portas de `projeto.ambientes` § "Banco local padrão de trabalho e compatibilidade Firebird".
@@ -150,8 +172,9 @@ Não recebe capítulo de Git (branch, commit, merge, limpeza) nem plano de rollb
 
 ### Teste unitário, em toda categoria
 
-Leia `coder.teste-unitario` § "O que o teste prova" e § "Onde o teste vive durante o
-atendimento". Junto com a correção nasce um teste DUnitX em
+Leia `coder.teste-unitario` § "O que o teste prova" e
+`coder.teste-unitario` § "Onde o teste vive durante o atendimento". Junto com a correção nasce
+um teste DUnitX em
 `C:\Developer\chamados\<n>\testes-unitarios\` — fora da worktree, fora do Git, fora do
 `Redsis.dproj` e fora do commit. O teste chama o código de produção **da worktree** e cobre, no
 mínimo, o caso do chamado e a intenção preservada. Compilar e rodar
@@ -229,15 +252,15 @@ A entrega tem seis peças, e nenhuma delas é um commit:
    Outro conhecimento descoberto vira proposta no `solucao.md`, conforme
    `regra.atualizacao-base` § "Colheita pelo servidor MCP".
 5. **Os comandos prontos**, escritos para o programador colar quando decidir — o commit dos
-   fontes com assunto `[<número>] descrição objetiva` (`regra.git` § "Procedimento padrão de
-   commit") e o merge na branch de destino. A skill escreve; ele executa.
+   fontes com assunto `[<número>] descrição objetiva`
+   (`regra.git` § "Procedimento padrão de commit") e o merge na branch de destino. A skill escreve; ele executa.
 6. **O resumo da causa, por último**, em `Tags/`, `Corretivos/` e `Integracoes/<n>`: o mesmo
    bloco que fecha o `solucao.md` — problema do chamado, qual alteração de qual chamado o
    causou, qual correção foi feita. É a última coisa da mensagem de entrega. Causa não
    confirmada se diz assim, com o suspeito e o que foi investigado; nunca se elege culpado
    por semelhança de assunto.
 
-A worktree e a branch `codex/<n>` **ficam de pé** ao fim do atendimento: são o ambiente
+A worktree e a branch `Work/<n>` **ficam de pé** ao fim do atendimento: são o ambiente
 isolado onde a alteração espera a decisão. Limpar worktree, apagar branch, empacotar e
 publicar são etapas de depois do commit — logo, não são desta skill.
 

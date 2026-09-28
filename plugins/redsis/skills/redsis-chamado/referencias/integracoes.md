@@ -11,7 +11,7 @@ arquivo lista só os **deltas** em relação ao ciclo comum — o resto do fluxo
 ## Identidade
 
 O identificador é `Integracao_<major.minor.release.build>` — quatro componentes — e é o mesmo
-na pasta, na branch `codex/` e na mensagem de commit.
+na pasta, na branch `Work/` e na mensagem de commit.
 
 Origem padrão: `Tags/<major.minor.release>` (três componentes). Confirmar que ela existe e
 está sincronizada com o remoto. Origem explícita informada pelo programador prevalece.
@@ -19,7 +19,7 @@ está sincronizada com o remoto. Origem explícita informada pelo programador pr
 
 ## Resolução de conflito
 
-Criar `codex/Integracao_<versão>` a partir da branch de destino e integrar a origem nela
+Criar `Work/Integracao_<versão>` a partir da branch de destino e integrar a origem nela
 **sem concluir o commit** (`git merge --no-commit`, `git cherry-pick -n`): a integração fica
 resolvida e em aberto, e quem comita é o programador. Antes de decidir conflito semântico:
 comparar ancestral comum, commits exclusivos e histórico dos trechos.
