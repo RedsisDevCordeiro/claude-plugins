@@ -1,8 +1,8 @@
 ---
 name: redsis-chamado
-description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — classifica pelo SAC (Tags, Corretivos, Evolutivos, Integracoes) sem precisar que o programador diga, cria sozinha a pasta, a branch e a worktree que faltarem, triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
+description: Conduz o chamado do ERP Redsis dentro de uma worktree isolada — classifica pelo SAC (Tags, Corretivos, Evolutivos, Integracoes) sem precisar que o programador diga, cria sozinha a pasta, a branch e a worktree que faltarem, traz do SAC os anexos e o banco do chamado, triagem, correção sob as regras do agente Coder, teste unitário DUnitX, `solucao.md` com o resumo da causa e preparação do ambiente de teste — e entrega a alteração EM ABERTO para o programador conferir e comitar; ao terminar, guarda o teste unitário e as regras de negócio extraídas no servidor da Redsis. NAO comita, NAO faz merge, NAO da push e NAO cria Pull Request. Use quando o pedido for "preciso resolver o chamado 19427930", "vou testar", "quero testar", "me mostra o que mudou", "terminei esse chamado" ou "finalizar em Release". NAO integra a main em lote nas branches (isso é redsis-conflitos), NAO monta a integração (isso é redsis-gerar-integracao) e NAO revisa PR alheio (isso é bitbucket-pr-review).
 argument-hint: "[numero-do-chamado]"
-allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_gravar mcp__redsis__redsis_sac_consultar mcp__plugin_redsis_redsis__redsis_sac_consultar Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git rev-parse:*) Bash(git merge-base:*) Bash(git worktree list:*) Bash(git branch --list:*) Bash(git blame:*) Bash(git reflog:*)
+allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_gravar mcp__redsis__redsis_sac_consultar mcp__plugin_redsis_redsis__redsis_sac_consultar mcp__redsis__redsis_sac_anexos mcp__plugin_redsis_redsis__redsis_sac_anexos mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status Bash(git status:*) Bash(git log:*) Bash(git diff:*) Bash(git show:*) Bash(git rev-parse:*) Bash(git merge-base:*) Bash(git worktree list:*) Bash(git branch --list:*) Bash(git blame:*) Bash(git reflog:*)
 ---
 
 # Ciclo de chamado Redsis
@@ -11,7 +11,7 @@ Este arquivo é **roteador, não procedimento**. O fluxo canônico vive na base 
 é relido a cada gatilho — inclusive quando esta conversa já o consultou.
 
 O chamado é uma **máquina de estados sobre os mesmos artefatos**: o número, a pasta
-`C:\Developer\chamados\<n>\`, a branch de destino, a worktree `Work/<n>` e o `solucao.md`.
+`C:\Developer\chamados\<n>\`, a branch do chamado, a worktree dela e o `solucao.md`.
 Por isso os gatilhos vivem numa skill só: cada um depende do estado que o anterior deixou,
 e escolher a etapa errada pula validação.
 
@@ -28,11 +28,12 @@ o programador conferir e comitar com as próprias mãos.
 > pedir o merge, o commit ou o PR, **dizer que essa etapa é dele**, entregar o diff e o
 > comando pronto, e parar.
 
-Esta regra **vence a seção canônica**. `git.commit-merge` § "Commit, aprovação e merge" e
-`git.pull-request` § "Publicação da branch e Pull Request na finalização" descrevem o fluxo antigo, em que o
-agente comitava e abria o PR. Elas continuam valendo para **o que** entra no commit — quais
-arquivos, qual mensagem, o que não se mistura — e deixam de valer para **quem executa**, que
-agora é sempre o programador. Nesse ponto, e só nesse, vale este arquivo.
+`git.commit-merge` § "Commit, aprovação e merge" já descreve esse fluxo: a worktree na própria
+branch do chamado, a alteração em aberto e o commit do programador. `git.pull-request` §
+"Publicação da branch e Pull Request na finalização" ainda descreve o fluxo antigo, em que o
+agente publicava a branch e abria o PR. Ela continua valendo para **o que** vai no PR — origem,
+destino, fechamento da branch — e deixa de valer para **quem executa**, que agora é sempre o
+programador. Nesse ponto, e só nesse, vale este arquivo.
 
 O isolamento não muda: worktree própria por chamado, branch de destino intacta no checkout
 principal, nenhuma alteração alheia tocada.
@@ -51,11 +52,12 @@ A camada 1 traz o índice geral: ele diz qual agente é dono de cada ID. Nota de
 lê na base dele — `redsis_ler(<base do dono>, <alvo>)` — ou se pergunta ao especialista,
 quando a resposta exigir julgamento da área dele.
 
-> [!important] O que falta, a skill cria — o que vem do cliente, não
+> [!important] O que falta, a skill traz ou cria — sem pedir
 > Pasta do chamado (e `C:\Developer\chamados\`, se faltar), `problema.txt` transcrito do SAC,
-> branch de destino e worktree: a skill cria sozinha, sem pedir ao programador. O `DBCOM.RED` e
-> os anexos vêm do cliente e **não** se inventam: se faltarem, diga isso e siga até a etapa que
-> depende deles — a preparação do teste.
+> branch de destino e worktree: a skill cria. Banco, prints, XML e demais arquivos do cliente
+> estão nos **anexos do chamado no SAC**: a skill os baixa pelo servidor para a pasta do chamado
+> e monta o `DBCOM.RED` a partir deles. Só se o SAC também não tiver o banco, diga isso e siga
+> até a etapa que depende dele — a preparação do teste.
 
 O fonte é `C:\Developer\Redsis` (Bitbucket `redsisdev/release`).
 
@@ -82,7 +84,7 @@ O gatilho seleciona a etapa **e** define o que fica autorizado. Errar na direç�
 
 | Gatilho | Pré-condição | Autoriza | NÃO autoriza |
 |---|---|---|---|
-| `preciso resolver o chamado <n>` | o número do chamado | classificação pelo SAC, criação da pasta, do `problema.txt`, da branch local e da worktree, triagem, correção, teste unitário na pasta do chamado, regra de negócio em `regras-pendentes`, `solucao.md` | commit, merge, push, PR |
+| `preciso resolver o chamado <n>` | o número do chamado | classificação pelo SAC, criação da pasta, do `problema.txt`, da branch local e da worktree, download dos anexos do SAC e montagem do `DBCOM.RED`, triagem, correção, teste unitário na pasta do chamado, regra de negócio em `regras-pendentes`, `solucao.md` | commit, merge, push, PR |
 | `vou testar` / `quero testar` | correção apresentada | cópia e validação do banco + Debug/Win32 **compilado na worktree** | commit, merge, push, PR |
 | `me mostra o que mudou` | worktree com alteração | inventário do diff, revisão, `solucao.md` atualizado | apagar ou mover o teste unitário; commit, merge, push, PR |
 | `terminei esse chamado` | worktree com alteração | o mesmo, `solucao.md` fechado com o resumo da causa, teste unitário gravado no servidor **e** apagado da máquina depois de conferido, comandos prontos de commit | **executar** commit, merge, push ou PR |
@@ -121,10 +123,21 @@ Depois, **crie o que faltar, sem pedir** (`sac.acionamento` § "Pasta, branch e 
 - a pasta `C:\Developer\chamados\<prefixo>-<n>` (`tags-`, `corretivos-`, `evolutivos-`,
   `integracoes-`), se não houver pasta nenhuma para o número;
 - o `problema.txt`, transcrito da timeline do SAC, se faltar;
+- os anexos do chamado e o `DBCOM.RED`, pela sequência de
+  `sac.acionamento` § "Anexos do chamado": `redsis_sac_anexos(chamado='<n>')` baixa no servidor
+  e devolve um link por arquivo; baixar cada um para a pasta do chamado com o token do MCP e
+  conferir o SHA-256; extrair `.rar`/`.zip`/`.7z` com o `tar.exe` do Windows; o único
+  `.RED`/`.FDB`/`.GDB` que vier vira `<pasta>\DBCOM.RED` (no anexo ele tem outro nome — o
+  19439920 trouxe `-HEBROM.RED` dentro de `-HEBROM.rar`); por fim
+  `redsis_sac_anexos(chamado='<n>', limpar=true)` apaga a cópia do servidor;
 - a branch de destino (`Tags/<n>`, `Corretivos/<n>`, `Evolutivos/<n>` ou `Integracoes/<n>`),
   local, a partir de `origin/<mãe>` depois de `git fetch origin` — criar não é publicar, e o
   push continua sendo do programador;
-- a worktree com `Work/<n>` (`git.worktree` § "Worktree e branches").
+- a worktree `<pasta>\worktree`, aberta **direto na branch do chamado** — sem branch de trabalho
+  separada: a alteração fica em aberto na própria branch do chamado, e o programador comita
+  dali, sem merge (`git.worktree` § "Worktree e branches"). Se a branch estiver aberta no
+  checkout principal ou em outra worktree, parar e dizer onde — nunca `--force`. Chamado
+  antigo que já tem `codex/<n>` ou `Work/<n>` com trabalho continua nela.
 
 O sufixo ` - retornado` **não** entra em número, branch, worktree nem commit. Nunca `--force`.
 
@@ -251,18 +264,19 @@ A entrega tem seis peças, e nenhuma delas é um commit:
    `C:\Agentes\Regras de negócio\Pendentes de autorização\`. Sem ficha, dizer "nenhuma".
    Outro conhecimento descoberto vira proposta no `solucao.md`, conforme
    `regra.atualizacao-base` § "Colheita pelo servidor MCP".
-5. **Os comandos prontos**, escritos para o programador colar quando decidir — o commit dos
-   fontes com assunto `[<número>] descrição objetiva`
-   (`regra.git` § "Procedimento padrão de commit") e o merge na branch de destino. A skill escreve; ele executa.
+5. **Os comandos prontos**, escritos para o programador colar quando decidir, de dentro da
+   worktree: `git add` dos arquivos do chamado, o commit com assunto `[<número>] descrição objetiva`
+   (`regra.git` § "Procedimento padrão de commit") e o `git push -u origin <branch do chamado>`.
+   Não há merge: o commit já nasce na branch do chamado. A skill escreve; ele executa.
 6. **O resumo da causa, por último**, em `Tags/`, `Corretivos/` e `Integracoes/<n>`: o mesmo
    bloco que fecha o `solucao.md` — problema do chamado, qual alteração de qual chamado o
    causou, qual correção foi feita. É a última coisa da mensagem de entrega. Causa não
    confirmada se diz assim, com o suspeito e o que foi investigado; nunca se elege culpado
    por semelhança de assunto.
 
-A worktree e a branch `Work/<n>` **ficam de pé** ao fim do atendimento: são o ambiente
-isolado onde a alteração espera a decisão. Limpar worktree, apagar branch, empacotar e
-publicar são etapas de depois do commit — logo, não são desta skill.
+A worktree **fica de pé** ao fim do atendimento: é o ambiente isolado onde a alteração
+espera o commit. Limpar a worktree, empacotar e publicar são etapas de depois do commit —
+logo, não são desta skill.
 
 ### Quando o pedido for `finalizar em Release`
 
@@ -310,8 +324,8 @@ Dois tipos de branch começam com `Integracoes/`, e só um deles muda o fluxo:
 
 > [!danger] Integrar também não é comitar
 > Integração é, por natureza, um commit — e continua sendo do programador. A skill resolve
-> os conflitos com a integração **em aberto** (`git merge --no-commit`,
-> `git cherry-pick -n`), apresenta o resultado e para. Concluir é o commit dele. Deixar o
+> os conflitos na worktree da própria branch da integração, com a integração **em aberto**
+> (`git merge --no-commit`, `git cherry-pick -n`), apresenta o resultado e para. Concluir é o commit dele. Deixar o
 > repositório em estado de merge é deliberado: é o "em aberto" desta categoria, e a entrega
 > tem de dizer isso com todas as letras, junto do comando que conclui.
 

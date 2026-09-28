@@ -11,7 +11,7 @@ arquivo lista só os **deltas** em relação ao ciclo comum — o resto do fluxo
 ## Identidade
 
 O identificador é `Integracao_<major.minor.release.build>` — quatro componentes — e é o mesmo
-na pasta, na branch `Work/` e na mensagem de commit.
+na pasta e na mensagem de commit.
 
 Origem padrão: `Tags/<major.minor.release>` (três componentes). Confirmar que ela existe e
 está sincronizada com o remoto. Origem explícita informada pelo programador prevalece.
@@ -19,8 +19,8 @@ está sincronizada com o remoto. Origem explícita informada pelo programador pr
 
 ## Resolução de conflito
 
-Criar `Work/Integracao_<versão>` a partir da branch de destino e integrar a origem nela
-**sem concluir o commit** (`git merge --no-commit`, `git cherry-pick -n`): a integração fica
+Abrir a worktree direto na branch de destino `Integracoes/Integracao_<versão>` e integrar a
+origem nela **sem concluir o commit** (`git merge --no-commit`, `git cherry-pick -n`): a integração fica
 resolvida e em aberto, e quem comita é o programador. Antes de decidir conflito semântico:
 comparar ancestral comum, commits exclusivos e histórico dos trechos.
 
@@ -39,12 +39,13 @@ comparar ancestral comum, commits exclusivos e histórico dos trechos.
 
 A ausência do `DBCOM.RED` **não impede** resolver conflito nem fazer revisão estática:
 informar a ausência e seguir só nas etapas independentes do banco. O arquivo passa a ser
-obrigatório quando o programador pedir a preparação do teste.
+obrigatório quando o programador pedir a preparação do teste — e, havendo chamado no SAC, vem
+dos anexos dele (`sac.acionamento` § "Anexos do chamado").
 
 ## Teste e Release
 
-Primeiro teste em `Debug`/`Win32`, com banco copiado e validado, usando o executável canônico
-do checkout principal.
+Primeiro teste em `Debug`/`Win32`, com banco copiado e validado, usando o executável compilado
+na worktree da integração.
 
 A Release versionada sai **somente** depois de o programador confirmar o sucesso do teste em
 Debug **e** pedir. Então: validar que os quatro componentes coincidem com o identificador,

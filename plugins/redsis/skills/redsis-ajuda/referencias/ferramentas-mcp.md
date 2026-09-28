@@ -185,6 +185,7 @@ um exe, devolve `NA_FILA` e o `identificador` para `redsis_exe_status`.
 |---|---|---|---|
 | `redsis_sac_consultar` | `rota`, `parametros`, `corpo`, `campos`, `agrupar` (até 3 campos), `nome`, `aguardar_segundos` | `rota` | tabela de até 40 linhas e a contagem de `agrupar`; todos os registros em `<nome>/registros.tsv`, um por linha, na área `sac` |
 | `redsis_sac_chamados` | `codigos` **ou** `de_consulta`, `amostra`, `semente`, `nome`, `aguardar_segundos` | um dos dois primeiros | até 10.000 chamados, 8 ao mesmo tempo: quem finalizou, o texto da finalização, a triagem do servidor e a contagem exata por quem finalizou; `<codigo>.json`, `<codigo>.md`, `indice.tsv`, `por_finalizador.tsv` e `revisar.tsv` na área `sac` |
+| `redsis_sac_anexos` | `chamado`, `limpar`, `aguardar_segundos` | `chamado` | os anexos do chamado baixados no servidor: nome, tamanho, `sha256` e um link por arquivo (exige o token do MCP); `limpar=true` apaga a cópia do servidor, que some sozinha em 24 h |
 
 `de_consulta` é o `nome` de uma consulta anterior: o servidor lê os códigos dela sem passar pela
 conversa — sem `amostra`, todos (~3 min por 1.000; um mês de finalizados do AT, ~15 min).
