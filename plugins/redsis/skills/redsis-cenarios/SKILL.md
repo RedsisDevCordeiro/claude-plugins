@@ -31,7 +31,7 @@ servidor lê a branch publicada e o chamado, e guarda o material na área de tra
 | `redsis_trabalho_ler` / `redsis_trabalho_listar` | lê o material, paginado, com o `sha256` de cada arquivo | não |
 | `redsis_git` | `show` por commit, `log` e `blame` do trecho, consumidores por `grep` — sempre com referência | não |
 | `redsis_trabalho_gravar` | grava `cenarios-de-teste-<n>.md` na área | não |
-| `redsis_cenarios_anexar` | anexa o `.md` conferido | **sim** |
+| `redsis_cenarios_anexar` | anexa o `.md` conferido, numerando (`_2`, `_3`...) quando o chamado já tem roteiro, sem substituir o anterior | **sim** |
 
 **Não procure `C:\Developer\Redsis`, `git` nem `SacApi.ps1` nesta máquina.** Se as
 ferramentas acima não estiverem carregadas, procure-as pelo nome exato — no Codex, com
@@ -117,7 +117,10 @@ a busca pelo nome não as trouxer o servidor MCP não está conectado: diga isso
    `sha256_anterior`.
 6. **Apresentar e perguntar** se pode anexar: chamado, assunto, arquivo, tamanho e `sha256`
    da gravação. Com o "pode", `redsis_cenarios_anexar(chamado, sha256)` e de novo
-   `redsis_exe_status` com o novo `pedido`. **Só `OK` prova o anexo.**
+   `redsis_exe_status` com o novo `pedido`. **Só `OK` prova o anexo.** Quando o chamado já
+   tem roteiro anexado, o novo sobe como `cenarios-de-teste-<n>_2.md`, `_3.md`... e o
+   anterior **não é substituído** — o campo `arquivo` do status diz o nome que chegou lá;
+   repasse esse nome a quem vai testar, para não abrirem a versão velha.
 
 ## O que a ferramenta não confere, e você tem de conferir
 

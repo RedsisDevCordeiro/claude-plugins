@@ -150,13 +150,24 @@ arquivo no meio, nada é gravado.
 | Ferramenta | Parâmetros | Obrigatório | Devolve |
 |---|---|---|---|
 | `redsis_cenarios_coletar` | `chamado`, `branch`, `base` | `chamado` | o intervalo, os commits do chamado, os alheios, e o `pedido` da leitura do SAC |
-| `redsis_cenarios_anexar` | `chamado`, `sha256` | os dois | o pedido do anexo — só `OK` no status prova o envio |
+| `redsis_cenarios_anexar` | `chamado`, `sha256`, `tipo` (`cenarios` \| `analise`) | os dois primeiros | o pedido do anexo — só `OK` no status prova o envio |
 
 A coleta resolve a branch no `origin`, delimita a alteração pelos commits que citam
 `[<chamado>]` e grava `commits.txt`, `arquivos.txt`, `arquivos-status.txt` e `diff.patch` na
 área `cenarios`; o job lê o chamado no SAC e grava `ticket.md` (status `COLETADO`). O anexo
 só aceita o `cenarios-de-teste-<n>.md` gravado, com o `sha256` da gravação e o número do
-chamado no título.
+chamado no título; se o chamado já tem anexo com esse nome, a cópia sobe como
+`cenarios-de-teste-<n>_2.md`, `_3.md`... — o SAC substitui anexo de mesmo nome, e quem está
+testando o roteiro anterior não pode vê-lo sumir. O campo `arquivo` do status diz o nome
+enviado.
+
+O `tipo` escolhe **qual** `.md` da pasta sobe, e com ele o nome que chega ao chamado:
+`cenarios` (padrão) manda o `cenarios-de-teste-<n>.md`, e `analise` manda o `analise-<n>.md`.
+O nome nunca vem do pedido — é o tipo que o deriva, no servidor e no driver, como a pasta é
+derivada do número. Os dois nomes são diferentes de propósito: roteiro e laudo chegam ao mesmo
+chamado sem um sobrescrever o outro. A análise não exige `redsis_cenarios_coletar` antes; grave
+o `analise-<n>.md` com `redsis_trabalho_gravar` na área `cenarios`, pasta `<n>/`, com o número
+do chamado na primeira linha.
 
 As escritas possíveis no SAC são três — os anexos `redsis_exe_anexar` e
 `redsis_cenarios_anexar`, e a anotação por tag `redsis_faq_anotar` —, e as três obedecem à
