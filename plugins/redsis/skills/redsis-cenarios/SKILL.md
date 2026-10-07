@@ -89,13 +89,20 @@ a busca pelo nome não as trouxer o servidor MCP não está conectado: diga isso
    um. Cenário escrito sobre alteração de outra pessoa manda o testador atrás do que este
    chamado não mexeu.
 2. **Entender o defeito.** `redsis_trabalho_ler('cenarios', '<n>/ticket.md')` inteiro — o
-   relato do cliente e a timeline. É ele que diz o **sintoma**, e o sintoma é o primeiro
-   cenário. O `ticket.md` é o chamado já limpo: entrada de timeline sem descrição é ruído de
-   movimentação, não relato (`sac.api` § "Conteúdos, tarefas e responsáveis"), e os códigos
-   de setor, coluna e status que aparecerem se traduzem por
+   relato do cliente, a timeline e as **tarefas**. É ele que diz o **sintoma**, e o sintoma é
+   o primeiro cenário. O `ticket.md` é o chamado já limpo: entrada de timeline sem descrição
+   é ruído de movimentação, não relato (`sac.api` § "Conteúdos, tarefas e responsáveis"), e
+   os códigos de setor, coluna e status que aparecerem se traduzem por
    `sac.vocabulario` § "Status do atendimento" e § "Movimento, a coluna do kanban" — `A` é
    **em atendimento**, não agendado. Se o status parou em `FALHOU` na etapa do SAC, o
    roteiro nasce cego: diga isso na entrega, não invente o relato a partir do diff.
+   A seção `## Tarefas` é o **checklist que o programador escreveu dentro do chamado**, um
+   item por defeito, com a `solucao` de cada um — num evolutivo grande é ali, e não no
+   assunto, que o pedido inteiro está escrito. Cada tarefa vira cenário, **inclusive a
+   pendente** (`[pendente]`): o testador precisa cobrir o que já foi entregue e o que ainda
+   falta. Tarefa pendente só não se declara como comportamento já corrigido. Contagem no
+   status: `itens_tarefas` e `tarefas_pendentes`; `tarefas_erro` diz que a rota das tarefas
+   falhou e a lista veio sem a `solucao` de cada item.
 3. **Entender a alteração.** `diff.patch`, paginado com `inicio` e `linhas`. Para cada
    trecho: o que mudou de comportamento observável — valor, status, mensagem, registro
    gravado, filtro, permissão. Releia `coder.investigacao` § "Investigação, correção e
