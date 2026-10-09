@@ -170,8 +170,10 @@ o `analise-<n>.md` com `redsis_trabalho_gravar` na área `cenarios`, pasta `<n>/
 do chamado na primeira linha.
 
 As escritas possíveis no SAC são três — os anexos `redsis_exe_anexar` e
-`redsis_cenarios_anexar`, e a anotação por tag `redsis_faq_anotar` —, e as três obedecem à
-regra do agente `SAC` (`sac.escrita` § "A regra das duas fases"). Não existe ferramenta para
+`redsis_cenarios_anexar`, e a anotação por tag `redsis_faq_anotar`. `redsis_exe_anexar` e
+`redsis_faq_anotar` obedecem à regra do agente `SAC` (`sac.escrita` § "A regra das duas
+fases"); `redsis_cenarios_anexar` **não pede "pode"** — anexa o roteiro ou o laudo conferido
+e presta contas depois. Não existe ferramenta para
 anotar outra coisa, movimentar, direcionar ou finalizar chamado: essas rotas existem na API
 (`sac.api`) e não estão ligadas a nenhum agente.
 

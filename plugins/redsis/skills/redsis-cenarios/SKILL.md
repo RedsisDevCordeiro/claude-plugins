@@ -1,8 +1,8 @@
 ---
 name: redsis-cenarios
-description: Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega `cenarios-de-teste-<número>.md` anexado no próprio chamado, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "anexa os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script do TestComplete.
+description: Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega `cenarios-de-teste-<número>.md` anexado no próprio chamado, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "anexa os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script automatizado do RedTestes (isso é redsis-redtestes).
 argument-hint: "[numero-do-chamado]"
-allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_git mcp__plugin_redsis_redsis__redsis_git mcp__redsis__redsis_cenarios_coletar mcp__plugin_redsis_redsis__redsis_cenarios_coletar mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status mcp__redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_ler
+allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__redsis__redsis_git mcp__plugin_redsis_redsis__redsis_git mcp__redsis__redsis_cenarios_coletar mcp__plugin_redsis_redsis__redsis_cenarios_coletar mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status mcp__redsis__redsis_trabalho_listar mcp__plugin_redsis_redsis__redsis_trabalho_listar mcp__redsis__redsis_trabalho_ler mcp__plugin_redsis_redsis__redsis_trabalho_ler mcp__redsis__redsis_trabalho_gravar mcp__plugin_redsis_redsis__redsis_trabalho_gravar mcp__redsis__redsis_cenarios_anexar mcp__plugin_redsis_redsis__redsis_cenarios_anexar
 ---
 
 # Cenários de teste do chamado
@@ -63,18 +63,24 @@ a busca pelo nome não as trouxer o servidor MCP não está conectado: diga isso
 
 | Gatilho | Pré-condição | Autoriza | NÃO autoriza |
 |---|---|---|---|
-| `gera os cenários de teste do chamado <n>` | branch do chamado publicada | coletar, ler o material, gravar o `.md` na área | anexar |
-| `pode anexar` / `manda pro chamado` | `.md` gravado e apresentado nesta conversa com número, assunto, arquivo, tamanho e `sha256` | `redsis_cenarios_anexar` com o `sha256` daquela gravação | reescrever o roteiro sem dizer |
+| `gera os cenários de teste do chamado <n>` | branch do chamado publicada | coletar, ler o material, gravar o `.md` **e anexar no chamado**, sem perguntar | reescrever o roteiro sem dizer |
+| `pode anexar` / `manda pro chamado` | `.md` gravado | `redsis_cenarios_anexar` com o `sha256` da gravação | anexar em chamado que não é o do pedido |
 | `só me diz o que testar` | a mesma coisa | apresentar os cenários na conversa | gravar, anexar |
 
 **Mencionar não aciona.** *"Como você monta os cenários?"* é pergunta.
 
-> [!danger] O anexo é escrita em produção que o cliente lê
-> Vale `sac.escrita` § "A regra das duas fases", na íntegra: `redsis_cenarios_anexar` só
-> entra depois de o programador ver, nesta conversa, **o número, o assunto do chamado, o
-> nome do arquivo, o tamanho e o `sha256`**. Um dígito errado põe o roteiro de um cliente no
-> atendimento de outro, e não há desfazer. As duas fases não se pulam — nem quando o pedido
-> já veio com "anexa aí" —, e o "pode" morre quando o arquivo é regravado.
+> [!aviso] O anexo sai sem pedir, e por isso a conferência é sua
+> `redsis_cenarios_anexar` **não pede "pode"**: gravado o `.md`, anexe. O roteiro é para
+> quem vai testar, e o anexo sobe numerado (`_2`, `_3`...) sem apagar o anterior. O que
+> impede o roteiro de um cliente no atendimento de outro são três conferências, todas suas
+> antes de chamar a ferramenta: o **número do chamado** é o do pedido, o **assunto** lido no
+> SAC é o chamado que você analisou, e o `.md` é o deste chamado. A ferramenta recusa título
+> sem o número e `sha256` que não confere — isso é rede, não conferência. Depois do anexo,
+> **diga** o número, o assunto e o nome que chegou lá. Não há desfazer.
+>
+> O "pode" continua obrigatório no executável (`redsis-exe`) e no FAQ
+> (`redsis-anotar-tag`): `sac.escrita` § "A regra das duas fases" vale para eles, e o aviso
+> no fim daquela seção tira os cenários da regra.
 
 ## Como conduzir
 
@@ -122,9 +128,10 @@ a busca pelo nome não as trouxer o servidor MCP não está conectado: diga isso
    `# Cenários de teste — chamado <n> — <assunto>`: o anexo recusa arquivo cujo título não
    cita o número. Para regravar, leia o arquivo e passe o `sha256` dele em
    `sha256_anterior`.
-6. **Apresentar e perguntar** se pode anexar: chamado, assunto, arquivo, tamanho e `sha256`
-   da gravação. Com o "pode", `redsis_cenarios_anexar(chamado, sha256)` e de novo
-   `redsis_exe_status` com o novo `pedido`. **Só `OK` prova o anexo.** Quando o chamado já
+6. **Anexar e prestar contas.** Confira o número e o assunto, e anexe sem perguntar:
+   `redsis_cenarios_anexar(chamado, sha256)` com o `sha256` da gravação, e de novo
+   `redsis_exe_status` com o novo `pedido`. **Só `OK` prova o anexo.** Com o `OK`, diga nesta
+   conversa o chamado, o assunto e o nome do arquivo que chegou lá. Quando o chamado já
    tem roteiro anexado, o novo sobe como `cenarios-de-teste-<n>_2.md`, `_3.md`... e o
    anterior **não é substituído** — o campo `arquivo` do status diz o nome que chegou lá;
    repasse esse nome a quem vai testar, para não abrirem a versão velha.
@@ -161,8 +168,8 @@ A ferramenta devolve o motivo inteiro. Nenhuma dessas paradas se contorna repeti
   Passe `base` com a referência certa, em vez de aceitar um diff vazio como "nada mudou";
 - **`FALHOU` na etapa do SAC** — o material do git está na área; siga só por ele e declare
   na entrega que o relato do cliente não foi lido;
-- **`sha256` não confere** — o `.md` foi regravado depois da conferência. Nada subiu:
-  mostre de novo e peça outro "pode";
+- **`sha256` não confere** — o `.md` foi regravado depois de você ler o `sha256`. Nada subiu:
+  leia o arquivo de novo e anexe com o `sha256` atual;
 - **anexo recusado pelo SAC** — o `.md` continua na área para nova tentativa. Não o apague.
 
 ## Encoding do diff
@@ -180,7 +187,8 @@ mensagem: texto errado no roteiro faz o testador procurar o que a tela nunca mos
 - Compilar e anexar o executável no chamado → `redsis-exe`
 - Roteiro por chamado dentro do lote de integração → `redsis-conflitos`
 - Tour do que foi puxado, auditoria da `main` → `redsis-qa`, `redsis-auditoria`
-- Script automatizado do TestComplete → não é aqui; esta skill entrega roteiro humano
+- Script automatizado do RedTestes a partir deste roteiro → `redsis-redtestes`; esta
+  skill entrega roteiro humano
 - Como o SAC funciona — rota, setor, coluna, status, o que pode ser escrito → agente `SAC`
   (`sac.api`, `sac.vocabulario`, `sac.armadilhas`, `sac.escrita`)
 - Estrutura do banco → `cerebro-dba` · regra de negócio → `cerebro-regras`

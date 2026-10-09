@@ -112,7 +112,7 @@ Texto completo: `skills/redsis-auditoria/SKILL.md`
 
 Argumentos: `[numero-do-chamado]`
 
-Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega `cenarios-de-teste-<número>.md` anexado no próprio chamado, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "anexa os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script do TestComplete.
+Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega `cenarios-de-teste-<número>.md` anexado no próprio chamado, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "anexa os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script automatizado do RedTestes (isso é redsis-redtestes).
 
 Texto completo: `skills/redsis-cenarios/SKILL.md`
 
@@ -163,6 +163,14 @@ Argumentos: `[intervalo git ou branch]`
 Faz o tour de QA do ERP Redsis sobre o que foi puxado — intervalo pelo reflog, crítica de código com trecho atual e trecho sugerido, trava de assinaturas, colheita de conhecimento — e grava o relatório no servidor da Redsis. O modo diário usa o git da própria pessoa (é o que ela puxou); a cópia estável e as branches publicadas rodam só pelo servidor. Use quando o pedido for "o que puxei hoje", "as atualizações de hoje", "as correções puxadas", "analise esse pull/branch/diff", "faça uma auditoria na cópia estável", ou "treinamento". NAO audita a main contra a TAG estável (isso é redsis-auditoria) e NAO altera código.
 
 Texto completo: `skills/redsis-qa/SKILL.md`
+
+### redsis-redtestes
+
+Argumentos: `[numero-do-chamado] [cenario...]`
+
+Transforma os cenários de teste de um chamado (`cenarios-de-teste-<n>.md`, já gravado no servidor pela redsis-cenarios) em um ou mais scripts JavaScript que o RedTestes (Central de Testes) importa e executa — um script por cenário automatizável, com `aqObject.CheckProperty` para cada resultado esperado, os helpers do projeto TestComplete copiados ao lado, numa pasta por chamado nesta máquina. Use quando o pedido for "gera os scripts do RedTestes do chamado 19436169", "transforma os cenários em script", "automatiza os cenários desse chamado", "quero rodar esses cenários no RedTestes" ou "script de teste automatizado do chamado". NAO escreve os cenários (isso é redsis-cenarios), NAO executa o script nem marca teste como feito, NAO comita no repositório testes e NAO anexa nada no SAC.
+
+Texto completo: `skills/redsis-redtestes/SKILL.md`
 
 ### redsis-sac
 

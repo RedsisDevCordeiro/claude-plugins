@@ -134,8 +134,8 @@ deu uma lista de exemplos, não a resposta.
 
 - **Escrever no chamado.** Anotar, mover de coluna, direcionar, retornar, finalizar,
   avaliar, abrir — nada disso tem ferramenta, e pedido desses se recusa dizendo por quê
-  (`sac.escrita` § "O que nenhuma skill faz sozinha"). Anexar é de `redsis-exe` e
-  `redsis-cenarios`, sob as duas fases.
+  (`sac.escrita` § "O que nenhuma skill faz sozinha"). Anexar é de `redsis-exe`, sob as duas
+  fases, e de `redsis-cenarios`, que anexa o roteiro e o laudo sem pedir "pode".
 - **Rota fora da lista.** A ferramenta recusa o que não é leitura conhecida. Não tente
   contornar com outra rota "parecida": a allowlist existe no servidor e no job.
 - **Ler o que o usuário `CLAUDE` não lê.** `/atendimentos/clientes/<codigo>` e
