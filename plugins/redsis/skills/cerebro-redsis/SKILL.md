@@ -1,6 +1,6 @@
 ---
 name: cerebro-redsis
-description: Diz qual contexto da base Redsis ler para a tarefa em mãos, qual procedimento canônico responde a um pedido, e qual fonte vence quando duas se contradizem. Use sempre que a pergunta for "onde está documentado X", "qual contexto preciso ler para mexer em Y", "qual o procedimento para Z", "que regra vale aqui", ou antes de mexer no fonte do Redsis sem saber o que a base já decidiu. NAO responde estrutura de tabela (isso é cerebro-dba) nem qual regra de negócio o sistema aplica (isso é cerebro-regras).
+description: Diz qual contexto da base Redsis ler para a tarefa em mãos, qual procedimento canônico responde a um pedido, e qual fonte vence quando duas se contradizem. Use sempre que a pergunta for "onde está documentado X", "qual contexto preciso ler para mexer em Y", "qual o procedimento para Z", "que regra vale aqui", ou antes de mexer no fonte do Redsis sem saber o que a base já decidiu. Se a base não responder, procura no código do Redsis do servidor e explica o que encontrou em linguagem de usuário e de técnico de suporte — sem código na resposta, no máximo um SELECT. NAO responde estrutura de tabela (isso é cerebro-dba) nem qual regra de negócio o sistema aplica (isso é cerebro-regras).
 argument-hint: "[assunto ou tabela ou tela]"
 ---
 
@@ -73,10 +73,10 @@ o que pode mudar concretamente a interpretação, a implementação ou a valida�
 Nunca carregue uma pasta inteira, um módulo inteiro, nem investigações antigas por
 proximidade de assunto.
 
-**Não responda o que a base não diz.** Sem contexto que sustente, a resposta é *"não está
-documentado na base"* — e não um palpite parecido. O código é fonte de consulta, mas
-comportamento encontrado no código **não é automaticamente a regra desejada**: pode ser
-legado, erro ou transição.
+**Não responda o que a base não diz.** Sem contexto que sustente, não dê um palpite
+parecido: procure no código, como manda a seção "Quando a base não responde". Comportamento
+encontrado no código **não é automaticamente a regra desejada** — pode ser legado, erro ou
+transição. Ele responde *o que o sistema faz hoje*, nunca *o que o sistema deveria fazer*.
 
 **Gatilho é procedimento, não sugestão.** Reconhecido o gatilho, releia a seção responsável
 antes de agir, mesmo que a conversa já a tenha consultado. É proibido substituir o
@@ -84,6 +84,52 @@ procedimento canônico por um criado na hora, ainda que pareça equivalente.
 
 **Mencionar não aciona.** *"Quando eu disser 'quero testar', o que você faz?"* é pergunta
 sobre o fluxo, não autorização para preparar o ambiente.
+
+## Quando a base não responde — o código
+
+Só depois de a camada 1 e o `redsis_buscar` da base dona do assunto (e da base `regras`,
+quando a pergunta for sobre comportamento) não trazerem nada que sustente a resposta.
+
+1. **Escolha a versão.** Leia `comum.versao-estavel` e use a branch dela
+   (`origin/Tags/<versão>`): é o que o cliente tem em produção. Se a pessoa citar outra
+   versão, use a dela; se perguntar por algo novo, ainda não liberado, use `origin/main`.
+2. **Procure pelo que o usuário vê.** O texto da mensagem de erro, o rótulo do campo, o nome
+   da tela ou a chave de configuração quase sempre aparecem literais no fonte:
+   `redsis_git(['grep','-n','-i','-e','<texto>','<referência>','--','*.pas','*.dfm'])`.
+   O `.dfm` liga o rótulo da tela ao componente; o `.pas` mostra o que acontece com ele.
+3. **Leia só o trecho.** `redsis_git(['show','<referência>:<caminho>'], inicio=<linha>, linhas=<n>)`
+   em volta do que o grep achou. Siga a chamada só até entender a condição e o efeito — não
+   leia a unit inteira.
+4. **Não achou ou não ficou claro:** diga que não está documentado e que o código não deixou
+   claro. Meia leitura apresentada como certeza é pior do que nenhuma resposta.
+
+Leitura no servidor, sempre por referência: não precisa de Delphi nem de clone em quem pede.
+
+## Como escrever a resposta
+
+Quem lê é o técnico de suporte e o usuário do sistema. Eles não leem Delphi.
+
+- **Nenhum código na resposta.** Nada de Pascal, nome de unit, classe, método, variável ou
+  componente (`edtValor`, `uCtrl_...`, `TModel...`). Traduza para o que a pessoa vê: o nome
+  da tela, o rótulo do campo, o botão, a mensagem exibida, a opção de configuração.
+- **No máximo um SQL**, e só quando ele ajuda o suporte a conferir o caso no banco do
+  cliente. Só `SELECT` — nunca `UPDATE`, `DELETE`, `INSERT` ou DDL. Monte-o com as regras da
+  `cerebro-dba`, para não cair nas armadilhas do banco.
+- **Diga de onde veio.** Resposta tirada do código abre com *"Não está documentado na base;
+  pelo que o sistema faz hoje (versão X):"* e termina lembrando que isso é o comportamento
+  atual, não uma regra confirmada.
+- **Formato:** o que acontece, em que condição, e o que o usuário ou o suporte pode fazer
+  (configuração a conferir, dado a corrigir, quando abrir chamado). Frases curtas.
+- Configuração do sistema vai pelo nome que aparece na tela de configurações ou pela chave
+  (`FIN / EXTRATO / ESTORNO`), nunca pela função que a lê.
+
+Exemplo do tom (lido em `origin/Tags/4.1.15`, tela de cheques): *"Não está documentado na
+base; pelo que o sistema faz hoje (versão 4.1.15): na tela de cheques, os campos de lote só
+ficam liberados para administrador. Quando a configuração FIN / EXTRATO / ESTORNO está como
+SIM, eles ficam travados até para o administrador — só o usuário cuja classe tem CHQ no
+nome consegue alterá-los. Se o cliente não consegue mexer no lote, confira essa
+configuração e a classe do usuário antes de abrir chamado. Isso é o comportamento atual,
+não uma regra confirmada."*
 
 ## Rotas — a frase do usuário e o que responde
 
@@ -152,7 +198,7 @@ Traduzindo para uso prático:
 
 ## Manutenção
 
-Esta skill é roteador: ela **não** guarda o conteúdo dos procedimentos, e não deve passar a
+Esta skill é roteador, com o código como último recurso: ela **não** guarda o conteúdo dos procedimentos, e não deve passar a
 guardar. Se divergir da base, vale a base — corrija a skill.
 
 ```

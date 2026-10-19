@@ -10,7 +10,7 @@ ficha, ID estável, ancorada no código por comentário `{ @BR-... }`.
 
 ## Onde a base mora
 
-**No servidor, não nesta máquina.** As 240 notas ficam em
+**No servidor, não nesta máquina.** As notas (773 fichas do Comercial Rochas em 08/10/2026, mais convenções, configurações e mapas) ficam em
 `C:\Agentes\Regras de negócio\Regras` no servidor da Redsis e chegam aqui pelas ferramentas
 do servidor MCP `redsis`:
 

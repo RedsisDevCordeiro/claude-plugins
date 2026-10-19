@@ -66,7 +66,7 @@ Texto completo: `skills/cerebro-dba/SKILL.md`
 
 Argumentos: `[assunto ou tabela ou tela]`
 
-Diz qual contexto da base Redsis ler para a tarefa em mãos, qual procedimento canônico responde a um pedido, e qual fonte vence quando duas se contradizem. Use sempre que a pergunta for "onde está documentado X", "qual contexto preciso ler para mexer em Y", "qual o procedimento para Z", "que regra vale aqui", ou antes de mexer no fonte do Redsis sem saber o que a base já decidiu. NAO responde estrutura de tabela (isso é cerebro-dba) nem qual regra de negócio o sistema aplica (isso é cerebro-regras).
+Diz qual contexto da base Redsis ler para a tarefa em mãos, qual procedimento canônico responde a um pedido, e qual fonte vence quando duas se contradizem. Use sempre que a pergunta for "onde está documentado X", "qual contexto preciso ler para mexer em Y", "qual o procedimento para Z", "que regra vale aqui", ou antes de mexer no fonte do Redsis sem saber o que a base já decidiu. Se a base não responder, procura no código do Redsis do servidor e explica o que encontrou em linguagem de usuário e de técnico de suporte — sem código na resposta, no máximo um SELECT. NAO responde estrutura de tabela (isso é cerebro-dba) nem qual regra de negócio o sistema aplica (isso é cerebro-regras).
 
 Texto completo: `skills/cerebro-redsis/SKILL.md`
 
