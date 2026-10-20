@@ -10,11 +10,11 @@
                     {
                         "name":  "redsis",
                         "description":  "Skills do ERP Redsis. As bases de conhecimento, a compilacao do exe e a bancada de conflitos rodam no servidor da Redsis: nesta maquina nao e preciso vault, Delphi nem clone do Redsis.",
-                        "version":  "0.2.29",
+                        "version":  "0.2.30",
                         "source":  {
                                        "source":  "archive",
-                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.29.zip",
-                                       "sha256":  "814fe9def9e5d871b7e548f1f473cfa04682667dddd1f53fcf93c3d68837a5d2"
+                                       "url":  "https://mcp.redsis.com.br/plugin/redsis-0.2.30.zip",
+                                       "sha256":  "8f5eea1b54109dca9c2e60295f68018e6416407c837d420024fd573999583e1f"
                                    }
                     }
                 ]

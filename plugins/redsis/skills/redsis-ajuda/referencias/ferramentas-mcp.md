@@ -165,7 +165,7 @@ O `tipo` escolhe **qual** `.md` da pasta sobe, e com ele o nome que chega ao cha
 `cenarios` (padrão) manda o `cenarios-de-teste-<n>.md`, e `analise` manda o `analise-<n>.md`.
 O nome nunca vem do pedido — é o tipo que o deriva, no servidor e no driver, como a pasta é
 derivada do número. Os dois nomes são diferentes de propósito: roteiro e laudo chegam ao mesmo
-chamado sem um sobrescrever o outro. A análise não exige `redsis_cenarios_coletar` antes; grave
+chamado sem um sobrescrever o outro. Quem escreve o laudo é a skill `redsis-analise`. A análise não exige `redsis_cenarios_coletar` antes; grave
 o `analise-<n>.md` com `redsis_trabalho_gravar` na área `cenarios`, pasta `<n>/`, com o número
 do chamado na primeira linha.
 

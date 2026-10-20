@@ -92,6 +92,14 @@ Explica o que cada skill do plugin Redsis faz quando é chamada, o que a dispara
 
 Texto completo: `skills/redsis-ajuda/SKILL.md`
 
+### redsis-analise
+
+Argumentos: `[o sintoma] [caminho do banco] [chamado] [branch]`
+
+Investiga onde o ERP Redsis produziu um estado errado no banco — parte do sintoma provado nos dados do cliente, elimina o banco (trigger, procedure, view) antes de culpar o fonte, varre TODOS os pontos de escrita do campo na branch escolhida e entrega o laudo com arquivo:linha e a correção sugerida descrita, anexado no chamado como analise-<n>.md. O banco é consultado nesta máquina, só leitura e sobre cópia; o fonte é lido pelo servidor. Use quando o pedido for "identifique uma situação na branch X", "verifique em que local do sistema pode ter gerado esse problema", "tenho o BD com a situação", "o campo Y está com valor errado e deveria ser Z", "descubra onde o sistema fez ficar assim" ou "analisa esse banco do cliente". NAO altera fonte nem prepara ambiente de teste (isso é redsis-chamado), NAO compila nem gera exe (isso é redsis-exe), NAO monta roteiro de teste (isso é redsis-cenarios), NAO anota FAQ de versão (isso é redsis-anotar-tag) e NAO escreve NADA no banco do cliente.
+
+Texto completo: `skills/redsis-analise/SKILL.md`
+
 ### redsis-anotar-tag
 
 Argumentos: `<TAG> <TITULO_FAQ>  ex.: 4.1.15.23 \"Redsis 4.1.15.23\`
