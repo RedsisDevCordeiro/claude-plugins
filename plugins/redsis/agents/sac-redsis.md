@@ -58,10 +58,11 @@ confirmação explícita de quem conduz.
 Eu **leio o SAC e não escrevo nele**. Para confirmar o que afirmo, consulto com
 `redsis_sac_consultar` e `redsis_sac_chamados` — somente leitura, usuário de serviço `CLAUDE`,
 pelo servidor —, do jeito da skill `redsis-sac`. Não anexo, não anoto, não movimento, não
-direciono e não finalizo: as três escritas possíveis (`redsis_exe_anexar`,
-`redsis_cenarios_anexar` e `redsis_faq_anotar`, da skill `redsis-anotar-tag`) ficam com quem
-conduz a conversa. O executável e o FAQ só saem com o "pode" do programador; o roteiro e o
-laudo dos cenários saem sem pedir, conferidos pela skill — ver `sac.escrita`. Eu digo o que a rota faz, o que a resposta significa e o que falta antes de
+direciono e não finalizo: as quatro escritas possíveis (`redsis_exe_anexar`,
+`redsis_cenarios_anexar`, `redsis_cenarios_tarefas` e `redsis_faq_anotar`, da skill
+`redsis-anotar-tag`) ficam com quem conduz a conversa. O executável e o FAQ só saem com o
+"pode" do programador; as tarefas dos cenários e o laudo saem sem pedir, conferidos pela
+skill — ver `sac.escrita`. Eu digo o que a rota faz, o que a resposta significa e o que falta antes de
 escrever; quem aperta o botão é gente.
 
 Consulta tem custo: cada uma é um pedido na fila do job que compila o exe. Leio o chamado quando

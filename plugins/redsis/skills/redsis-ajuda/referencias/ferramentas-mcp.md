@@ -150,12 +150,22 @@ arquivo no meio, nada é gravado.
 | Ferramenta | Parâmetros | Obrigatório | Devolve |
 |---|---|---|---|
 | `redsis_cenarios_coletar` | `chamado`, `branch`, `base` | `chamado` | o intervalo, os commits do chamado, os alheios, e o `pedido` da leitura do SAC |
+| `redsis_cenarios_tarefas` | `chamado`, `sha256` | os dois | o pedido das tarefas e da anotação — só `OK` no status prova a escrita |
 | `redsis_cenarios_anexar` | `chamado`, `sha256`, `tipo` (`cenarios` \| `analise`) | os dois primeiros | o pedido do anexo — só `OK` no status prova o envio |
 
 A coleta resolve a branch no `origin`, delimita a alteração pelos commits que citam
 `[<chamado>]` e grava `commits.txt`, `arquivos.txt`, `arquivos-status.txt` e `diff.patch` na
-área `cenarios`; o job lê o chamado no SAC e grava `ticket.md` (status `COLETADO`). O anexo
-só aceita o `cenarios-de-teste-<n>.md` gravado, com o `sha256` da gravação e o número do
+área `cenarios`; o job lê o chamado no SAC e grava `ticket.md` (status `COLETADO`).
+
+As tarefas são o caminho normal dos cenários desde 2026-10-26. `redsis_cenarios_tarefas` lê o
+`cenarios-de-teste-<n>.md` conferido (mesmo `sha256` e mesmo número no título): cada seção
+`### C<n> — <título>` ou `### R<n> — <título>` vira uma tarefa no grupo `Cenários de teste`,
+na ordem do arquivo, e a seção `## Anotação no chamado` vira uma anotação na timeline. No
+retorno do chamado, a tarefa que já existe no grupo com o mesmo texto é pulada; mesmo número
+com texto diferente é recusado sem escrever nada (`tarefas_conflito`). Com `OK`, o status
+traz `grupo`, `tarefas_criadas`, `tarefas_puladas` e `anotado`.
+
+O anexo do roteiro, só quando o programador pede o `.md` no chamado, aceita o `cenarios-de-teste-<n>.md` gravado, com o `sha256` da gravação e o número do
 chamado no título; se o chamado já tem anexo com esse nome, a cópia sobe como
 `cenarios-de-teste-<n>_2.md`, `_3.md`... — o SAC substitui anexo de mesmo nome, e quem está
 testando o roteiro anterior não pode vê-lo sumir. O campo `arquivo` do status diz o nome
@@ -169,13 +179,14 @@ chamado sem um sobrescrever o outro. Quem escreve o laudo é a skill `redsis-ana
 o `analise-<n>.md` com `redsis_trabalho_gravar` na área `cenarios`, pasta `<n>/`, com o número
 do chamado na primeira linha.
 
-As escritas possíveis no SAC são três — os anexos `redsis_exe_anexar` e
-`redsis_cenarios_anexar`, e a anotação por tag `redsis_faq_anotar`. `redsis_exe_anexar` e
-`redsis_faq_anotar` obedecem à regra do agente `SAC` (`sac.escrita` § "A regra das duas
-fases"); `redsis_cenarios_anexar` **não pede "pode"** — anexa o roteiro ou o laudo conferido
-e presta contas depois. Não existe ferramenta para
-anotar outra coisa, movimentar, direcionar ou finalizar chamado: essas rotas existem na API
-(`sac.api`) e não estão ligadas a nenhum agente.
+As escritas possíveis no SAC são quatro — os anexos `redsis_exe_anexar` e
+`redsis_cenarios_anexar`, as tarefas e a anotação dos cenários `redsis_cenarios_tarefas`, e a
+anotação por tag `redsis_faq_anotar`. `redsis_exe_anexar` e `redsis_faq_anotar` obedecem à
+regra do agente `SAC` (`sac.escrita` § "A regra das duas fases"); `redsis_cenarios_tarefas` e
+`redsis_cenarios_anexar` **não pedem "pode"** — escrevem o roteiro ou o laudo conferido e
+prestam contas depois. Não existe ferramenta para editar ou apagar tarefa, anotar outra coisa,
+movimentar, direcionar ou finalizar chamado: essas rotas existem na API (`sac.api`) e não
+estão ligadas a nenhum agente.
 
 ## As do FAQ de versão (skill `redsis-anotar-tag`)
 

@@ -118,9 +118,9 @@ Texto completo: `skills/redsis-auditoria/SKILL.md`
 
 ### redsis-cenarios
 
-Argumentos: `[numero-do-chamado]`
+Argumentos: `[numero-do-chamado] [ATUALIZAR]`
 
-Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega `cenarios-de-teste-<número>.md` anexado no próprio chamado, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "anexa os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script automatizado do RedTestes (isso é redsis-redtestes).
+Monta os cenários de teste de um chamado já corrigido — lê o relato no SAC, lê a alteração real da branch do chamado, cruza com o impacto em cascata e entrega cada cenário como uma tarefa do próprio chamado, no grupo "Cenários de teste", com uma anotação breve da causa e do que foi feito, para quem vai testar. Tudo pelo servidor MCP da Redsis — quem pede não precisa de Delphi, git, clone do Redsis nem credencial do SAC. Use quando o pedido for "gera os cenários de teste do chamado 19436169", "o que precisa ser testado nesse chamado", "monta o roteiro de teste dessa branch", "coloca os cenários no chamado" ou "quero ter certeza do que testar antes de liberar". NAO corrige o chamado nem prepara o ambiente de teste (isso é redsis-chamado), NAO compila nem anexa executável (isso é redsis-exe) e NAO escreve script automatizado do RedTestes (isso é redsis-redtestes).
 
 Texto completo: `skills/redsis-cenarios/SKILL.md`
 

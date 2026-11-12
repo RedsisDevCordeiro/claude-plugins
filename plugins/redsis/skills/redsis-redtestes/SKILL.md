@@ -49,7 +49,9 @@ escreva cenário aqui para ter o que automatizar: a revisão do roteiro é dela.
 
 1. **Ler os cenários.** `redsis_trabalho_listar('cenarios', sob='<n>')`. Havendo
    `_2`, `_3`..., o de maior número é o último anexado — confirme com quem pede se é ele.
-   Leia o `.md` inteiro com `redsis_trabalho_ler`. Leia também `resumo.json` (branch) e,
+   Leia o `.md` inteiro com `redsis_trabalho_ler`: é a mesma fonte das tarefas que a
+   `redsis-cenarios` criou no chamado. Cada `### C<n>` e `### R<n>` é um cenário; o `C0` é a
+   preparação dos dados e não vira script. Leia também `resumo.json` (branch) e,
    quando o cenário cita tela ou campo novo, o trecho do `diff.patch` que o criou.
 2. **Classificar cada cenário**, e mostrar a tabela antes de escrever:
    - *automatizável* — passos na tela do Redsis e resultado visível na tela ou no banco;
