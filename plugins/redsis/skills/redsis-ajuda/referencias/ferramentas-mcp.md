@@ -91,17 +91,23 @@ num worktree dedicado.
 | `redsis_exe_gerar` | `chamado`, `branch`, `config`, `versao`, `sem_anexar` | `chamado`, ou `branch` com `sem_anexar=true` | `identificador` e `pedido` para acompanhar |
 | `redsis_exe_status` | `identificador`, `pedido`, `aguardar_segundos` | `identificador` | `DRY_RUN`, `PACOTE_PRONTO`, `COMPILADO`, `COLETADO`, `OK`, `FALHOU`, ou `EM_ANDAMENTO`/`NA_FILA` |
 | `redsis_exe_anexar` | `chamado`, `sha256` | os dois | o pedido do anexo — só `OK` no status prova o envio |
-| `redsis_exe_enviar` | `identificador`, `sha256` | `identificador` | sem `sha256`, o dry-run do envio à pasta da Juliana; com ele, o envio |
+| `redsis_ftp_listar` | `caminho`, `aguardar_segundos` | — | subpastas e arquivos de `/ftp/<caminho>` (vazio = raiz) |
+| `redsis_ftp_baixar` | `caminho`, `aguardar_segundos` | `caminho` | `BAIXADO` com `ftp-<hex>`, `sha256` e o link de download |
+| `redsis_ftp_enviar` | `destino`, `origem`, `sha256`, `aguardar_segundos` | `destino`, `origem` | `OK` (enviado), ou `DRY_RUN` quando o destino já existe — sobrescreve só com o `sha256` dele |
+| `redsis_ftp_limpar` | `identificador` | `identificador` | apaga do servidor a cópia de um `ftp-<hex>` |
 
 `config` é `Debug` (padrão) ou `Release`; `versao` só com Release, `x.y.z.w`.
 `aguardar_segundos` é preso em `[0, 50]`: cada chamada já espera, não é preciso dormir
 entre elas. `redsis_exe_status` acompanha **todo** pedido ao job — exe, bancada, cenários
 (`identificador='cenarios-<n>'`) e envio (`identificador='envio-<id>'`).
 
-`redsis_exe_anexar` e `redsis_exe_enviar` escrevem fora do servidor — no chamado que o
-cliente lê e na pasta de outra pessoa — e só aceitam o `sha256` completo do dry-run atual:
-se o pacote foi regerado, nada sobe. O destino do envio é fixo, a pasta `Juliana` de
-`arquivos.redsis.com.br`, e a credencial dele mora no servidor.
+`redsis_exe_anexar` e `redsis_ftp_enviar` escrevem fora do servidor — no chamado que o
+cliente lê e na pasta de outra pessoa. `redsis_exe_anexar` só aceita o `sha256` completo do
+dry-run atual: se o pacote foi regerado, nada sobe. `redsis_ftp_enviar` (skill `redsis-ftp`)
+vale para qualquer pasta de `arquivos.redsis.com.br/ftp/`: arquivo novo sobe direto, e
+sobrescrever exige o `sha256` do `DRY_RUN` daquele destino e daquela origem. A origem é um
+pacote do servidor ou um `ftp-<hex>` — arquivo baixado do FTP ou subido da máquina por
+`PUT /ftp-entrada/<nome>`. A credencial mora no servidor.
 
 ## `redsis_git` (skills `redsis-qa`, `redsis-auditoria` e `redsis-cenarios`)
 

@@ -43,8 +43,8 @@ Precisa de git. Numa linha so:
 ```
 
 Ela grava o token, registra este catalogo, instala o plugin, liga os especialistas como
-subagentes, pre-aprova as ferramentas do servidor (menos as que escrevem no SAC, na pasta
-da Juliana e no Bitbucket, que o Codex pergunta antes) e pede ao Codex, no
+subagentes, pre-aprova as ferramentas do servidor (menos as que escrevem no SAC, no servidor
+de arquivos e no Bitbucket, que o Codex pergunta antes) e pede ao Codex, no
 `~/.codex/AGENTS.md`, que delegue aos especialistas as perguntas sobre o Redsis.
 
 Depois disso nada se atualiza a mao: o Codex busca este catalogo sempre que abre.

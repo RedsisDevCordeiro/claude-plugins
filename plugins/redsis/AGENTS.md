@@ -156,11 +156,19 @@ Gera o executável do ERP Redsis a partir da branch de um chamado — compila NO
 
 Texto completo: `skills/redsis-exe/SKILL.md`
 
+### redsis-ftp
+
+Argumentos: `[listar|baixar|enviar] [caminho no FTP] [arquivo]`
+
+Acessa o servidor de arquivos da Redsis (arquivos.redsis.com.br/ftp/, o "FTP" das pastas de cada pessoa) pelo servidor MCP — lista qualquer pasta, baixa qualquer arquivo para a máquina e envia para qualquer pasta um pacote gerado no servidor ou um arquivo da máquina de quem pede. Quem pede não precisa de credencial nem de cliente de FTP. Use quando o pedido for "o que tem na pasta da Juliana no FTP", "lista o FTP", "baixa do FTP o arquivo X da pasta do Cordeiro", "sobe esse arquivo para a pasta do Claude no FTP", "manda o pacote da integração para a pasta da Juliana" ou "copia do FTP da pasta A para a pasta B". É também a peça que as outras skills usam para mexer no FTP (a redsis-gerar-integracao entrega o pacote por ela). NAO apaga nem renomeia arquivo no FTP, NAO cria pasta e NAO sobrescreve arquivo sem o "pode" de quem pediu.
+
+Texto completo: `skills/redsis-ftp/SKILL.md`
+
 ### redsis-gerar-integracao
 
 Argumentos: `[versao] [chamado...]`
 
-Monta a próxima branch `Integracoes/Integracao_NN` a partir da main na bancada do servidor — sem Delphi, sem clone e sem credencial nenhuma na máquina de quem pede —, puxa por cherry-pick o pull request de cada chamado aprovado, resolve os conflitos, varre duplicidade, publica com autorização, compila o Release na versão informada e envia o pacote, do próprio servidor, para a pasta da Juliana. Use quando o pedido for "gera a integração com esses chamados", "monta a próxima integração", "gera a Integracao_06 na versão 4.1.16.0" ou "sobe o exe da integração pra Juliana". NAO atende chamado do zero (isso é redsis-chamado) e NAO integra a main nas branches de chamado (isso é redsis-conflitos).
+Monta a próxima branch `Integracoes/Integracao_NN` a partir da main na bancada do servidor — sem Delphi, sem clone e sem credencial nenhuma na máquina de quem pede —, puxa por cherry-pick o pull request de cada chamado aprovado, resolve os conflitos, varre duplicidade, publica com autorização, compila o Release na versão informada e envia o pacote, do próprio servidor e pela skill redsis-ftp, para a pasta da Juliana no FTP. Use quando o pedido for "gera a integração com esses chamados", "monta a próxima integração", "gera a Integracao_06 na versão 4.1.16.0" ou "sobe o exe da integração pra Juliana". NAO atende chamado do zero (isso é redsis-chamado) e NAO integra a main nas branches de chamado (isso é redsis-conflitos).
 
 Texto completo: `skills/redsis-gerar-integracao/SKILL.md`
 

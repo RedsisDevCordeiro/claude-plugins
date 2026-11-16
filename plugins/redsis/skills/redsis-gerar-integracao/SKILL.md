@@ -1,6 +1,6 @@
 ---
 name: redsis-gerar-integracao
-description: Monta a próxima branch `Integracoes/Integracao_NN` a partir da main na bancada do servidor — sem Delphi, sem clone e sem credencial nenhuma na máquina de quem pede —, puxa por cherry-pick o pull request de cada chamado aprovado, resolve os conflitos, varre duplicidade, publica com autorização, compila o Release na versão informada e envia o pacote, do próprio servidor, para a pasta da Juliana. Use quando o pedido for "gera a integração com esses chamados", "monta a próxima integração", "gera a Integracao_06 na versão 4.1.16.0" ou "sobe o exe da integração pra Juliana". NAO atende chamado do zero (isso é redsis-chamado) e NAO integra a main nas branches de chamado (isso é redsis-conflitos).
+description: Monta a próxima branch `Integracoes/Integracao_NN` a partir da main na bancada do servidor — sem Delphi, sem clone e sem credencial nenhuma na máquina de quem pede —, puxa por cherry-pick o pull request de cada chamado aprovado, resolve os conflitos, varre duplicidade, publica com autorização, compila o Release na versão informada e envia o pacote, do próprio servidor e pela skill redsis-ftp, para a pasta da Juliana no FTP. Use quando o pedido for "gera a integração com esses chamados", "monta a próxima integração", "gera a Integracao_06 na versão 4.1.16.0" ou "sobe o exe da integração pra Juliana". NAO atende chamado do zero (isso é redsis-chamado) e NAO integra a main nas branches de chamado (isso é redsis-conflitos).
 argument-hint: "[versao] [chamado...]"
 allowed-tools: mcp__redsis__redsis_camada1 mcp__redsis__redsis_ler mcp__redsis__redsis_buscar mcp__redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_camada1 mcp__plugin_redsis_redsis__redsis_ler mcp__plugin_redsis_redsis__redsis_buscar mcp__plugin_redsis_redsis__redsis_listar mcp__plugin_redsis_redsis__redsis_bancada_estado mcp__plugin_redsis_redsis__redsis_bancada_git mcp__plugin_redsis_redsis__redsis_bancada_ler mcp__plugin_redsis_redsis__redsis_bancada_duplicidade mcp__redsis__redsis_bancada_estado mcp__redsis__redsis_bancada_git mcp__redsis__redsis_bancada_ler mcp__redsis__redsis_bancada_duplicidade mcp__redsis__redsis_exe_status mcp__plugin_redsis_redsis__redsis_exe_status
 ---
@@ -23,7 +23,7 @@ julgamento é seu, nesta conversa.
 | `redsis_bancada_duplicidade` | o nome repetido que o git não acusa |
 | `redsis_bancada_publicar` | o `push`, só com o "pode" |
 | `redsis_exe_gerar` + `redsis_exe_status` | o Release na versão, já da branch publicada |
-| `redsis_exe_enviar` | o pacote do servidor para a pasta da Juliana: dry-run, e o envio só com o "pode" |
+| `redsis_ftp_enviar` | o pacote do servidor para a pasta da Juliana no FTP, pela skill `redsis-ftp` |
 
 > [!warning] É uma bancada só, para o servidor inteiro
 > Confira com `redsis_bancada_estado` antes de abrir. Se houver outra sessão, **espere ou
@@ -139,22 +139,17 @@ confere `FileVersion` e `ProductVersion` no executável — compilar não prova 
 
 ## Passo 8 — subir para a pasta da Juliana
 
-O pacote já está no servidor, e o envio sai de lá — nada é baixado nesta máquina:
+O pacote já está no servidor, e o envio sai de lá — nada é baixado nesta máquina. O envio
+é da skill `redsis-ftp`: siga a seção "Enviar" dela, com
 
 ```
-redsis_exe_enviar(identificador="Integracao_NN")
+redsis_ftp_enviar(destino="JULIANA/", origem="Integracao_NN")
 ```
 
-Acompanhe com `redsis_exe_status(identificador="envio-Integracao_NN", pedido)` até o
-`DRY_RUN`: ele traz arquivo, tamanho, `sha256`, destino e se já existe arquivo com aquele
-nome na pasta.
-
-> [!danger] A pasta é de outra pessoa, e o envio sobrescreve sem desfazer
-> A primeira chamada **nunca** leva `sha256`, nem quando o pedido veio com "sobe lá".
-> Apresente o dry-run e pergunte. Depois do "pode",
-> `redsis_exe_enviar(identificador="Integracao_NN", sha256=<o do dry-run>)` e de novo
-> `redsis_exe_status` com o novo `pedido`. **Só `OK` prova o envio**: o servidor confere o
-> `Content-Length` que o servidor de arquivos devolve — existir não prova tamanho.
+A pasta é a `JULIANA`; outra só quando o pedido nomear (liste com `redsis_ftp_listar` se
+houver dúvida sobre o nome). Arquivo novo sobe direto e volta `OK`. Se já existe um
+`Redsis_Integracao_NN.rar` lá, volta `DRY_RUN` e **nada sobe** até o "pode" de sobrescrever,
+como manda a `redsis-ftp`. **Só `OK` prova o envio.**
 
 ## A matriz de portas
 
@@ -163,7 +158,8 @@ nome na pasta.
 | lista de chamados + versão | base lida; bancada livre | abrir a branch, cherry-picks, resolver conflito, varrer duplicidade | publicar, compilar, enviar |
 | `pode publicar` | cherry-picks fechados; sem duplicidade nova | `redsis_bancada_publicar(confirmar=true)` | Pull Request, merge na main |
 | `gera o Release` | branch publicada | `redsis_exe_gerar` em Release com a versão | comitar o `.dproj` alterado |
-| `pode subir` | dry-run do envio apresentado | `redsis_exe_enviar` com o `sha256` do dry-run | subir outro arquivo, criar pasta |
+| `sobe` / `envia` | Release `PACOTE_PRONTO` | `redsis_ftp_enviar` para a pasta pedida, sem `sha256` | subir outro arquivo, criar pasta |
+| `pode sobrescrever` | `DRY_RUN` do envio apresentado | `redsis_ftp_enviar` com o `sha256` do `DRY_RUN` | sobrescrever outro destino |
 
 **Mencionar não aciona**, e um "pode" vale só para **a etapa que estava na tela** — publicar
 não autoriza subir.
@@ -192,7 +188,7 @@ não autoriza subir.
 ## Manutenção
 
 As ferramentas de bancada vivem em `mcp\servidor.py`, no servidor, e o envio em
-`mcp\Enviar-Arquivos.ps1`, chamado pelo job `Redsis Exe`. O `Gerar-Integracao.ps1` desta
+`mcp\Ftp-Arquivos.ps1`, chamado pelo job `Redsis Exe`. O `Gerar-Integracao.ps1` desta
 pasta é o caminho **antigo**, que exigia clone e Delphi na máquina: ficou como referência do
 algoritmo e não é mais o fluxo. Se esta skill e `redsis-exe` divergirem em
 parâmetro ou falha, **vale `redsis-exe`**. Depois de mexer aqui ou na base:
